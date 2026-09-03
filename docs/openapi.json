@@ -1,0 +1,1958 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "RuangPijar BFF API",
+    "version": "1.0.0",
+    "description": "Backend-for-frontend REST API for RuangPijar, backed by MongoDB/Mongoose and Next.js Route Handlers. Every endpoint below (except `/api/auth/*`) requires the Auth.js session cookie set by signing in through `/api/auth/signin` (Google) or a `POST` to `/api/auth/callback/credentials` (email + password). Auth.js also exposes `/api/auth/signout`, `/api/auth/csrf`, and `/api/auth/providers`, which are not re-documented here since their shape is defined by the library, not this app."
+  },
+  "servers": [
+    {
+      "url": "/",
+      "description": "Current origin"
+    }
+  ],
+  "security": [
+    {
+      "cookieAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Auth",
+      "description": "Session endpoint provided by Auth.js."
+    },
+    {
+      "name": "Me",
+      "description": "The signed-in user's own account."
+    },
+    {
+      "name": "Check-ins",
+      "description": "Mood/energy/stress logging."
+    },
+    {
+      "name": "Jejak",
+      "description": "Unified activity timeline."
+    },
+    {
+      "name": "Insights",
+      "description": "Generated observations over check-in history."
+    },
+    {
+      "name": "Actions",
+      "description": "Catalog of coping/wellness actions."
+    },
+    {
+      "name": "Action Logs",
+      "description": "A user's attempts at an Action."
+    },
+    {
+      "name": "Personalization",
+      "description": "Per-user app preferences and onboarding state."
+    }
+  ],
+  "paths": {
+    "/api/auth/session": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Get the current session",
+        "description": "Returns the decoded session for the request's cookie, or `{}` if there isn't one. Useful for a frontend to check login state without calling a protected route first.",
+        "operationId": "getSession",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Current session (possibly empty).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Session"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/me": {
+      "get": {
+        "tags": [
+          "Me"
+        ],
+        "summary": "Get my profile",
+        "operationId": "getMe",
+        "responses": {
+          "200": {
+            "description": "The signed-in user.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No active session cookie.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Unauthorized"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource does not exist, or does not belong to the caller.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Me"
+        ],
+        "summary": "Update my profile",
+        "operationId": "updateMe",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MeUpdateInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated user.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Body failed schema validation (bad shape, out-of-range value, etc).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Validation failed",
+                  "details": {
+                    "mood": "Path `mood` (6) is more than maximum allowed value (5)."
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No active session cookie.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Unauthorized"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource does not exist, or does not belong to the caller.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/check-ins": {
+      "get": {
+        "tags": [
+          "Check-ins"
+        ],
+        "summary": "List my check-ins",
+        "operationId": "listCheckIns",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "1-indexed page number.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Items per page (max 100).",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "ISO date-time lower bound on checkedInAt.",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "ISO date-time upper bound on checkedInAt.",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Page of check-ins, newest first.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "page": {
+                          "type": "integer",
+                          "example": 1
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "example": 20
+                        },
+                        "total": {
+                          "type": "integer",
+                          "example": 42
+                        },
+                        "totalPages": {
+                          "type": "integer",
+                          "example": 3
+                        }
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/CheckIn"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No active session cookie.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Unauthorized"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Check-ins"
+        ],
+        "summary": "Create a check-in",
+        "operationId": "createCheckIn",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckInCreateInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The created check-in.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckIn"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Body failed schema validation (bad shape, out-of-range value, etc).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Validation failed",
+                  "details": {
+                    "mood": "Path `mood` (6) is more than maximum allowed value (5)."
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No active session cookie.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Unauthorized"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/check-ins/{id}": {
+      "get": {
+        "tags": [
+          "Check-ins"
+        ],
+        "summary": "Get a check-in",
+        "operationId": "getCheckIn",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Check-in id.",
+            "schema": {
+              "type": "string",
+              "example": "65f1a2b3c4d5e6f7a8b9c0d1"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The check-in.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckIn"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No active session cookie.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Unauthorized"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource does not exist, or does not belong to the caller.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Check-ins"
+        ],
+        "summary": "Update a check-in",
+        "operationId": "updateCheckIn",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Check-in id.",
+            "schema": {
+              "type": "string",
+              "example": "65f1a2b3c4d5e6f7a8b9c0d1"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckInUpdateInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated check-in.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckIn"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Body failed schema validation (bad shape, out-of-range value, etc).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Validation failed",
+                  "details": {
+                    "mood": "Path `mood` (6) is more than maximum allowed value (5)."
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No active session cookie.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Unauthorized"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource does not exist, or does not belong to the caller.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Check-ins"
+        ],
+        "summary": "Delete a check-in",
+        "operationId": "deleteCheckIn",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Check-in id.",
+            "schema": {
+              "type": "string",
+              "example": "65f1a2b3c4d5e6f7a8b9c0d1"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted."
+          },
+          "401": {
+            "description": "No active session cookie.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Unauthorized"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource does not exist, or does not belong to the caller.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/jejak": {
+      "get": {
+        "tags": [
+          "Jejak"
+        ],
+        "summary": "List my activity trail",
+        "description": "Merges check-ins, action logs, and insights into one chronological feed, newest first. There's no dedicated Jejak model — entries are assembled on read from the other three collections.",
+        "operationId": "listJejak",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "1-indexed page number.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Items per page (max 100).",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Page of merged activity entries.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/JejakEntry"
+                      }
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "limit": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No active session cookie.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Unauthorized"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/insights": {
+      "get": {
+        "tags": [
+          "Insights"
+        ],
+        "summary": "List my insights",
+        "operationId": "listInsights",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "1-indexed page number.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Items per page (max 100).",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
+          },
+          {
+            "name": "isRead",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/InsightType"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Page of insights, newest first.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "page": {
+                          "type": "integer",
+                          "example": 1
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "example": 20
+                        },
+                        "total": {
+                          "type": "integer",
+                          "example": 42
+                        },
+                        "totalPages": {
+                          "type": "integer",
+                          "example": 3
+                        }
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/Insight"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No active session cookie.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Unauthorized"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/insights/generate": {
+      "post": {
+        "tags": [
+          "Insights"
+        ],
+        "summary": "Generate insights from recent check-ins",
+        "description": "Rule-based analysis (no ML/LLM) over the last 14 days of check-ins: mood/stress/energy trend shifts, a stress↔sleep Pearson correlation, and a dominant stressor-factor pattern. Returns an empty array with a 200 if there are fewer than 3 check-ins in the window or no candidate crosses its threshold.",
+        "operationId": "generateInsights",
+        "responses": {
+          "200": {
+            "description": "No new insights were generated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerateInsightsResult"
+                },
+                "example": {
+                  "insights": [],
+                  "message": "Belum cukup data untuk membuat insight baru."
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "One or more insights were created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerateInsightsResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No active session cookie.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Unauthorized"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/insights/{id}": {
+      "patch": {
+        "tags": [
+          "Insights"
+        ],
+        "summary": "Mark an insight read (or unread)",
+        "description": "Body is optional; omitting it (or `isRead`) defaults to marking the insight as read.",
+        "operationId": "markInsightRead",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Insight id.",
+            "schema": {
+              "type": "string",
+              "example": "65f1a2b3c4d5e6f7a8b9c0d1"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InsightReadInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated insight.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Insight"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No active session cookie.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Unauthorized"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource does not exist, or does not belong to the caller.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/actions": {
+      "get": {
+        "tags": [
+          "Actions"
+        ],
+        "summary": "List active actions",
+        "operationId": "listActions",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "1-indexed page number.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Items per page (max 100).",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/ActionType"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Page of active actions.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "page": {
+                          "type": "integer",
+                          "example": 1
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "example": 20
+                        },
+                        "total": {
+                          "type": "integer",
+                          "example": 42
+                        },
+                        "totalPages": {
+                          "type": "integer",
+                          "example": 3
+                        }
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/Action"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No active session cookie.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Unauthorized"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/actions/recommended": {
+      "get": {
+        "tags": [
+          "Actions"
+        ],
+        "summary": "Get recommended actions",
+        "description": "Matches Action.relatedFactors against the factors from the caller's 5 most recent check-ins, then tops up with generic active actions if fewer than 6 factor-matched actions are found.",
+        "operationId": "getRecommendedActions",
+        "responses": {
+          "200": {
+            "description": "Recommended actions.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Action"
+                      }
+                    },
+                    "basedOnFactors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Factors (most frequent first) used to select these actions."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No active session cookie.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Unauthorized"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/action-logs": {
+      "post": {
+        "tags": [
+          "Action Logs"
+        ],
+        "summary": "Start an action",
+        "description": "Creates a log with status STARTED. Fails with 404 if actionId doesn't reference a real Action.",
+        "operationId": "createActionLog",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActionLogCreateInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The created action log.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionLog"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Body failed schema validation (bad shape, out-of-range value, etc).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Validation failed",
+                  "details": {
+                    "mood": "Path `mood` (6) is more than maximum allowed value (5)."
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No active session cookie.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Unauthorized"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource does not exist, or does not belong to the caller.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/action-logs/{id}": {
+      "patch": {
+        "tags": [
+          "Action Logs"
+        ],
+        "summary": "Complete or skip an action log",
+        "description": "Transitions status to COMPLETED or SKIPPED and stamps completedAt with the server time.",
+        "operationId": "updateActionLog",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Action log id.",
+            "schema": {
+              "type": "string",
+              "example": "65f1a2b3c4d5e6f7a8b9c0d1"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActionLogUpdateInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated action log.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionLog"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Body failed schema validation (bad shape, out-of-range value, etc).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Validation failed",
+                  "details": {
+                    "mood": "Path `mood` (6) is more than maximum allowed value (5)."
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No active session cookie.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Unauthorized"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource does not exist, or does not belong to the caller.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/personalization": {
+      "get": {
+        "tags": [
+          "Personalization"
+        ],
+        "summary": "Get my personalization settings",
+        "description": "A 1:1 settings resource. If none exists yet, one is upserted with schema defaults.",
+        "operationId": "getPersonalization",
+        "responses": {
+          "200": {
+            "description": "The user's settings.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Personalization"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No active session cookie.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Unauthorized"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Personalization"
+        ],
+        "summary": "Update my personalization settings",
+        "description": "Upserts — works even before a settings document exists. Setting `onboardingCompleted: true` server-stamps `onboardingCompletedAt`; setting it back to `false` clears that timestamp.",
+        "operationId": "updatePersonalization",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PersonalizationUpdateInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated settings.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Personalization"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Body failed schema validation (bad shape, out-of-range value, etc).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Validation failed",
+                  "details": {
+                    "mood": "Path `mood` (6) is more than maximum allowed value (5)."
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No active session cookie.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Unauthorized"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "cookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "authjs.session-token",
+        "description": "Auth.js v5 JWT session cookie. Named `authjs.session-token` over HTTP (dev) or `__Secure-authjs.session-token` over HTTPS (production). Set automatically by the browser after signing in via `/api/auth/signin`; not passable as a header."
+      }
+    },
+    "responses": {
+      "Unauthorized": {
+        "description": "No active session cookie.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": "Unauthorized"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Resource does not exist, or does not belong to the caller.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "ValidationFailed": {
+        "description": "Body failed schema validation (bad shape, out-of-range value, etc).",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": "Validation failed",
+              "details": {
+                "mood": "Path `mood` (6) is more than maximum allowed value (5)."
+              }
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "details": {
+            "type": "object",
+            "description": "Present on 400s from schema validation: field name → message.",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "error"
+        ]
+      },
+      "Session": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Mongo _id of the User document.",
+                "example": "65f1a2b3c4d5e6f7a8b9c0d1"
+              },
+              "name": {
+                "type": "string",
+                "nullable": true
+              },
+              "email": {
+                "type": "string",
+                "format": "email",
+                "nullable": true
+              },
+              "image": {
+                "type": "string",
+                "nullable": true
+              }
+            }
+          },
+          "expires": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "User id.",
+            "example": "65f1a2b3c4d5e6f7a8b9c0d1"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "avatarUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "onboardingCompleted": {
+            "type": "boolean",
+            "default": false
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
+        }
+      },
+      "MeUpdateInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "avatarUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "onboardingCompleted": {
+            "type": "boolean"
+          }
+        }
+      },
+      "Factor": {
+        "type": "string",
+        "enum": [
+          "ACADEMIC",
+          "WORK",
+          "SOCIAL",
+          "FAMILY",
+          "FINANCIAL",
+          "SLEEP",
+          "RELATIONSHIP",
+          "SELF",
+          "OTHER"
+        ]
+      },
+      "CheckIn": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Check-in id.",
+            "example": "65f1a2b3c4d5e6f7a8b9c0d1"
+          },
+          "userId": {
+            "type": "string",
+            "description": "Owning user id.",
+            "example": "65f1a2b3c4d5e6f7a8b9c0d1"
+          },
+          "mood": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "energy": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 10
+          },
+          "stress": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 10
+          },
+          "sleepHours": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 24,
+            "nullable": true
+          },
+          "academicLoad": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 10,
+            "nullable": true
+          },
+          "socialLoad": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 10,
+            "nullable": true
+          },
+          "factors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Factor"
+            }
+          },
+          "reflection": {
+            "type": "string",
+            "maxLength": 2000,
+            "nullable": true
+          },
+          "checkedInAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
+        }
+      },
+      "CheckInCreateInput": {
+        "type": "object",
+        "required": [
+          "mood",
+          "energy",
+          "stress"
+        ],
+        "properties": {
+          "mood": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 5,
+            "example": 3
+          },
+          "energy": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 10,
+            "example": 6
+          },
+          "stress": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 10,
+            "example": 7
+          },
+          "sleepHours": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 24,
+            "example": 6.5
+          },
+          "academicLoad": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 10
+          },
+          "socialLoad": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 10
+          },
+          "factors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Factor"
+            },
+            "example": [
+              "ACADEMIC",
+              "SLEEP"
+            ]
+          },
+          "reflection": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "checkedInAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Defaults to now if omitted."
+          }
+        }
+      },
+      "CheckInUpdateInput": {
+        "type": "object",
+        "description": "Same fields as CheckInCreateInput, all optional.",
+        "properties": {
+          "mood": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "energy": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 10
+          },
+          "stress": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 10
+          },
+          "sleepHours": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 24,
+            "nullable": true
+          },
+          "academicLoad": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 10,
+            "nullable": true
+          },
+          "socialLoad": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 10,
+            "nullable": true
+          },
+          "factors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Factor"
+            }
+          },
+          "reflection": {
+            "type": "string",
+            "maxLength": 2000,
+            "nullable": true
+          },
+          "checkedInAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "JejakEntry": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "CHECK_IN",
+              "ACTION_LOG",
+              "INSIGHT"
+            ]
+          },
+          "id": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "data": {
+            "description": "The full CheckIn, ActionLog, or Insight document, matching `type`.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/CheckIn"
+              },
+              {
+                "$ref": "#/components/schemas/ActionLog"
+              },
+              {
+                "$ref": "#/components/schemas/Insight"
+              }
+            ]
+          }
+        }
+      },
+      "InsightType": {
+        "type": "string",
+        "enum": [
+          "CORRELATION",
+          "TREND",
+          "PATTERN",
+          "REFLECTION"
+        ]
+      },
+      "Metric": {
+        "type": "string",
+        "enum": [
+          "MOOD",
+          "STRESS",
+          "ENERGY",
+          "SLEEP",
+          "ACADEMIC_LOAD",
+          "SOCIAL_LOAD"
+        ]
+      },
+      "Insight": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Insight id.",
+            "example": "65f1a2b3c4d5e6f7a8b9c0d1"
+          },
+          "userId": {
+            "type": "string",
+            "description": "Owning user id.",
+            "example": "65f1a2b3c4d5e6f7a8b9c0d1"
+          },
+          "type": {
+            "$ref": "#/components/schemas/InsightType"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 150
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1000
+          },
+          "metric": {
+            "$ref": "#/components/schemas/Metric"
+          },
+          "relatedMetric": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Metric"
+              }
+            ],
+            "nullable": true
+          },
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "nullable": true
+          },
+          "periodStart": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "periodEnd": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "isRead": {
+            "type": "boolean",
+            "default": false
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
+        }
+      },
+      "InsightReadInput": {
+        "type": "object",
+        "properties": {
+          "isRead": {
+            "type": "boolean",
+            "default": true
+          }
+        }
+      },
+      "GenerateInsightsResult": {
+        "type": "object",
+        "properties": {
+          "insights": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Insight"
+            }
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "ActionType": {
+        "type": "string",
+        "enum": [
+          "REFLECTION",
+          "BREATHING",
+          "RECOVERY",
+          "PLANNING",
+          "EDUCATION",
+          "SUPPORT"
+        ]
+      },
+      "Action": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Action id.",
+            "example": "65f1a2b3c4d5e6f7a8b9c0d1"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 150
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1000
+          },
+          "type": {
+            "$ref": "#/components/schemas/ActionType"
+          },
+          "durationMinutes": {
+            "type": "integer",
+            "minimum": 1,
+            "nullable": true
+          },
+          "relatedFactors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "isActive": {
+            "type": "boolean",
+            "default": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
+        }
+      },
+      "ActionLogStatus": {
+        "type": "string",
+        "enum": [
+          "STARTED",
+          "COMPLETED",
+          "SKIPPED"
+        ]
+      },
+      "ActionLog": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Action log id.",
+            "example": "65f1a2b3c4d5e6f7a8b9c0d1"
+          },
+          "userId": {
+            "type": "string",
+            "description": "Owning user id.",
+            "example": "65f1a2b3c4d5e6f7a8b9c0d1"
+          },
+          "actionId": {
+            "type": "string",
+            "description": "The Action this log is for.",
+            "example": "65f1a2b3c4d5e6f7a8b9c0d1"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ActionLogStatus"
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
+        }
+      },
+      "ActionLogCreateInput": {
+        "type": "object",
+        "required": [
+          "actionId"
+        ],
+        "properties": {
+          "actionId": {
+            "type": "string",
+            "description": "The Action to start.",
+            "example": "65f1a2b3c4d5e6f7a8b9c0d1"
+          }
+        }
+      },
+      "ActionLogUpdateInput": {
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "COMPLETED",
+              "SKIPPED"
+            ],
+            "description": "STARTED is set implicitly on create and can't be re-applied via PATCH."
+          }
+        }
+      },
+      "FocusArea": {
+        "type": "string",
+        "enum": [
+          "MOOD",
+          "STRESS",
+          "ENERGY",
+          "SLEEP",
+          "ACADEMIC",
+          "SOCIAL",
+          "RELATIONSHIP",
+          "SELF"
+        ]
+      },
+      "Personalization": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Personalization id.",
+            "example": "65f1a2b3c4d5e6f7a8b9c0d1"
+          },
+          "userId": {
+            "type": "string",
+            "description": "Owning user id (unique).",
+            "example": "65f1a2b3c4d5e6f7a8b9c0d1"
+          },
+          "focusAreas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FocusArea"
+            }
+          },
+          "checkInFrequency": {
+            "type": "string",
+            "enum": [
+              "DAILY",
+              "FEW_TIMES_A_WEEK"
+            ],
+            "default": "DAILY"
+          },
+          "preferredCheckInTime": {
+            "type": "string",
+            "nullable": true,
+            "example": "08:00"
+          },
+          "onboardingCompleted": {
+            "type": "boolean",
+            "default": false
+          },
+          "onboardingCompletedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
+        }
+      },
+      "PersonalizationUpdateInput": {
+        "type": "object",
+        "properties": {
+          "focusAreas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FocusArea"
+            }
+          },
+          "checkInFrequency": {
+            "type": "string",
+            "enum": [
+              "DAILY",
+              "FEW_TIMES_A_WEEK"
+            ]
+          },
+          "preferredCheckInTime": {
+            "type": "string",
+            "nullable": true
+          },
+          "onboardingCompleted": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  }
+}
