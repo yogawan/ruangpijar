@@ -19,7 +19,7 @@
   "tags": [
     {
       "name": "Auth",
-      "description": "Session endpoint provided by Auth.js."
+      "description": "Registration plus the session endpoint provided by Auth.js."
     },
     {
       "name": "Me",
@@ -67,6 +67,65 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Session"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/register": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Register a credentials account",
+        "description": "Creates an email + password account. The only write endpoint that does not need a session. On success the client should send the user to sign in via `POST /api/auth/callback/credentials`; this endpoint does not start a session itself.",
+        "operationId": "register",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The created account. Never includes the password hash.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing name, malformed email, or password shorter than 8 characters.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Password must be at least 8 characters"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "An account with this email already exists.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Email already registered"
                 }
               }
             }
@@ -1361,6 +1420,49 @@
             "type": "string",
             "format": "date-time",
             "readOnly": true
+          }
+        }
+      },
+      "RegisterInput": {
+        "type": "object",
+        "required": [
+          "name",
+          "email",
+          "password"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Sasa"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Lowercased and trimmed before storage.",
+            "example": "sasa@email.com"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8,
+            "format": "password",
+            "description": "Hashed with bcrypt; never stored or returned in plain text."
+          }
+        }
+      },
+      "RegisterResult": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "65f1a2b3c4d5e6f7a8b9c0d1"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
           }
         }
       },
