@@ -30,9 +30,11 @@ const userSchema = new Schema(
       select: false,
     },
 
+    // No `default: null` — a stored null still occupies the sparse unique
+    // index, so every credentials-only account after the first would collide.
+    // Left unset, the document is skipped by the index entirely.
     googleId: {
       type: String,
-      default: null,
       unique: true,
       sparse: true,
       select: false,
