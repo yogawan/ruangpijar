@@ -4,30 +4,12 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useEffect, useState } from "react";
-
-type Personalization = {
-  focusAreas: string[];
-  checkInFrequency: string;
-  preferredCheckInTime: string | null;
-};
-
-// Values mirror the enums in models/Personalization.ts; the API rejects
-// anything outside them.
-const FOCUS_AREAS = [
-  { value: "MOOD", label: "Suasana hati" },
-  { value: "STRESS", label: "Stres" },
-  { value: "ENERGY", label: "Energi" },
-  { value: "SLEEP", label: "Tidur" },
-  { value: "ACADEMIC", label: "Akademik" },
-  { value: "SOCIAL", label: "Sosial" },
-  { value: "RELATIONSHIP", label: "Relasi" },
-  { value: "SELF", label: "Diri sendiri" },
-] as const;
-
-const CHECK_IN_FREQUENCIES = [
-  { value: "DAILY", label: "Setiap hari" },
-  { value: "FEW_TIMES_A_WEEK", label: "Beberapa kali seminggu" },
-] as const;
+import {
+  CHECK_IN_FREQUENCIES,
+  editablePersonalization,
+  FOCUS_AREAS,
+  type Personalization,
+} from "@/lib/personalization-labels";
 
 // One step per personalization field. Nothing is submitted until the last
 // one, so the whole thing stays a single PATCH.
@@ -83,17 +65,10 @@ export default function OnboardingPage() {
           return;
         }
 
-        // Keep only what the walk-through edits. The response also carries
-        // _id, userId and timestamps, and the last step submits this object
-        // wholesale.
+        // Keep only what the walk-through edits — the last step submits this
+        // object wholesale.
         const data = (await response.json()) as Personalization;
-        if (active) {
-          setForm({
-            focusAreas: data.focusAreas,
-            checkInFrequency: data.checkInFrequency,
-            preferredCheckInTime: data.preferredCheckInTime,
-          });
-        }
+        if (active) setForm(editablePersonalization(data));
       } catch {
         if (active) {
           setError("Tidak bisa terhubung ke server. Periksa koneksimu.");
