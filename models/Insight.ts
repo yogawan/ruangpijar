@@ -1,5 +1,5 @@
 // models/Insight.ts
-import { Schema, model, models, type InferSchemaType } from "mongoose";
+import { type InferSchemaType, model, models, Schema } from "mongoose";
 
 const insightSchema = new Schema(
   {
@@ -12,12 +12,7 @@ const insightSchema = new Schema(
 
     type: {
       type: String,
-      enum: [
-        "CORRELATION",
-        "TREND",
-        "PATTERN",
-        "REFLECTION",
-      ],
+      enum: ["CORRELATION", "TREND", "PATTERN", "REFLECTION"],
       required: true,
     },
 
@@ -94,5 +89,4 @@ insightSchema.index({
 
 export type Insight = InferSchemaType<typeof insightSchema>;
 
-export const InsightModel =
-  models.Insight || model("Insight", insightSchema);
+export const InsightModel = models.Insight || model("Insight", insightSchema);

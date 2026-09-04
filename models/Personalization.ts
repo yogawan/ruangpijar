@@ -1,11 +1,6 @@
 // models/Personalization.ts
 
-import {
-  Schema,
-  model,
-  models,
-  type InferSchemaType,
-} from "mongoose";
+import { type InferSchemaType, model, models, Schema } from "mongoose";
 
 const personalizationSchema = new Schema(
   {
@@ -38,10 +33,7 @@ const personalizationSchema = new Schema(
 
     checkInFrequency: {
       type: String,
-      enum: [
-        "DAILY",
-        "FEW_TIMES_A_WEEK",
-      ],
+      enum: ["DAILY", "FEW_TIMES_A_WEEK"],
       default: "DAILY",
     },
 
@@ -65,10 +57,7 @@ const personalizationSchema = new Schema(
   },
 );
 
-export type Personalization = InferSchemaType<
-  typeof personalizationSchema
->;
+export type Personalization = InferSchemaType<typeof personalizationSchema>;
 
 export const PersonalizationModel =
-  models.Personalization ||
-  model("Personalization", personalizationSchema);
+  models.Personalization || model("Personalization", personalizationSchema);

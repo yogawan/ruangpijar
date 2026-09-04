@@ -1,5 +1,5 @@
 // models/Action.ts
-import { Schema, model, models, type InferSchemaType } from "mongoose";
+import { type InferSchemaType, model, models, Schema } from "mongoose";
 
 const actionSchema = new Schema(
   {
@@ -51,5 +51,4 @@ const actionSchema = new Schema(
 
 export type Action = InferSchemaType<typeof actionSchema>;
 
-export const ActionModel =
-  models.Action || model("Action", actionSchema);
+export const ActionModel = models.Action || model("Action", actionSchema);

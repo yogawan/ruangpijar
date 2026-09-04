@@ -1,5 +1,5 @@
 // models/CheckIn.ts
-import { Schema, model, models, type InferSchemaType } from "mongoose";
+import { type InferSchemaType, model, models, Schema } from "mongoose";
 
 const checkInSchema = new Schema(
   {
@@ -96,5 +96,4 @@ checkInSchema.index({
 
 export type CheckIn = InferSchemaType<typeof checkInSchema>;
 
-export const CheckInModel =
-  models.CheckIn || model("CheckIn", checkInSchema);
+export const CheckInModel = models.CheckIn || model("CheckIn", checkInSchema);
