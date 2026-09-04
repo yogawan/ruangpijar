@@ -53,9 +53,7 @@
   "paths": {
     "/api/auth/session": {
       "get": {
-        "tags": [
-          "Auth"
-        ],
+        "tags": ["Auth"],
         "summary": "Get the current session",
         "description": "Returns the decoded session for the request's cookie, or `{}` if there isn't one. Useful for a frontend to check login state without calling a protected route first.",
         "operationId": "getSession",
@@ -76,9 +74,7 @@
     },
     "/api/auth/register": {
       "post": {
-        "tags": [
-          "Auth"
-        ],
+        "tags": ["Auth"],
         "summary": "Register a credentials account",
         "description": "Creates an email + password account. The only write endpoint that does not need a session. On success the client should send the user to sign in via `POST /api/auth/callback/credentials`; this endpoint does not start a session itself.",
         "operationId": "register",
@@ -135,9 +131,7 @@
     },
     "/api/me": {
       "get": {
-        "tags": [
-          "Me"
-        ],
+        "tags": ["Me"],
         "summary": "Get my profile",
         "operationId": "getMe",
         "responses": {
@@ -177,9 +171,7 @@
         }
       },
       "patch": {
-        "tags": [
-          "Me"
-        ],
+        "tags": ["Me"],
         "summary": "Update my profile",
         "operationId": "updateMe",
         "requestBody": {
@@ -246,9 +238,7 @@
     },
     "/api/check-ins": {
       "get": {
-        "tags": [
-          "Check-ins"
-        ],
+        "tags": ["Check-ins"],
         "summary": "List my check-ins",
         "operationId": "listCheckIns",
         "parameters": [
@@ -354,9 +344,7 @@
         }
       },
       "post": {
-        "tags": [
-          "Check-ins"
-        ],
+        "tags": ["Check-ins"],
         "summary": "Create a check-in",
         "operationId": "createCheckIn",
         "requestBody": {
@@ -414,9 +402,7 @@
     },
     "/api/check-ins/{id}": {
       "get": {
-        "tags": [
-          "Check-ins"
-        ],
+        "tags": ["Check-ins"],
         "summary": "Get a check-in",
         "operationId": "getCheckIn",
         "parameters": [
@@ -468,9 +454,7 @@
         }
       },
       "patch": {
-        "tags": [
-          "Check-ins"
-        ],
+        "tags": ["Check-ins"],
         "summary": "Update a check-in",
         "operationId": "updateCheckIn",
         "parameters": [
@@ -547,9 +531,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "Check-ins"
-        ],
+        "tags": ["Check-ins"],
         "summary": "Delete a check-in",
         "operationId": "deleteCheckIn",
         "parameters": [
@@ -596,9 +578,7 @@
     },
     "/api/jejak": {
       "get": {
-        "tags": [
-          "Jejak"
-        ],
+        "tags": ["Jejak"],
         "summary": "List my activity trail",
         "description": "Merges check-ins, action logs, and insights into one chronological feed, newest first. There's no dedicated Jejak model — entries are assembled on read from the other three collections.",
         "operationId": "listJejak",
@@ -670,9 +650,7 @@
     },
     "/api/insights": {
       "get": {
-        "tags": [
-          "Insights"
-        ],
+        "tags": ["Insights"],
         "summary": "List my insights",
         "operationId": "listInsights",
         "parameters": [
@@ -776,9 +754,7 @@
     },
     "/api/insights/generate": {
       "post": {
-        "tags": [
-          "Insights"
-        ],
+        "tags": ["Insights"],
         "summary": "Generate insights from recent check-ins",
         "description": "Rule-based analysis (no ML/LLM) over the last 14 days of check-ins: mood/stress/energy trend shifts, a stress↔sleep Pearson correlation, and a dominant stressor-factor pattern. Returns an empty array with a 200 if there are fewer than 3 check-ins in the window or no candidate crosses its threshold.",
         "operationId": "generateInsights",
@@ -825,9 +801,7 @@
     },
     "/api/insights/{id}": {
       "patch": {
-        "tags": [
-          "Insights"
-        ],
+        "tags": ["Insights"],
         "summary": "Mark an insight read (or unread)",
         "description": "Body is optional; omitting it (or `isRead`) defaults to marking the insight as read.",
         "operationId": "markInsightRead",
@@ -891,9 +865,7 @@
     },
     "/api/actions": {
       "get": {
-        "tags": [
-          "Actions"
-        ],
+        "tags": ["Actions"],
         "summary": "List active actions",
         "operationId": "listActions",
         "parameters": [
@@ -990,9 +962,7 @@
     },
     "/api/actions/recommended": {
       "get": {
-        "tags": [
-          "Actions"
-        ],
+        "tags": ["Actions"],
         "summary": "Get recommended actions",
         "description": "Matches Action.relatedFactors against the factors from the caller's 5 most recent check-ins, then tops up with generic active actions if fewer than 6 factor-matched actions are found.",
         "operationId": "getRecommendedActions",
@@ -1040,9 +1010,7 @@
     },
     "/api/action-logs": {
       "post": {
-        "tags": [
-          "Action Logs"
-        ],
+        "tags": ["Action Logs"],
         "summary": "Start an action",
         "description": "Creates a log with status STARTED. Fails with 404 if actionId doesn't reference a real Action.",
         "operationId": "createActionLog",
@@ -1111,9 +1079,7 @@
     },
     "/api/action-logs/{id}": {
       "patch": {
-        "tags": [
-          "Action Logs"
-        ],
+        "tags": ["Action Logs"],
         "summary": "Complete or skip an action log",
         "description": "Transitions status to COMPLETED or SKIPPED and stamps completedAt with the server time.",
         "operationId": "updateActionLog",
@@ -1194,9 +1160,7 @@
     },
     "/api/personalization": {
       "get": {
-        "tags": [
-          "Personalization"
-        ],
+        "tags": ["Personalization"],
         "summary": "Get my personalization settings",
         "description": "A 1:1 settings resource. If none exists yet, one is upserted with schema defaults.",
         "operationId": "getPersonalization",
@@ -1227,9 +1191,7 @@
         }
       },
       "patch": {
-        "tags": [
-          "Personalization"
-        ],
+        "tags": ["Personalization"],
         "summary": "Update my personalization settings",
         "description": "Upserts — works even before a settings document exists. Setting `onboardingCompleted: true` server-stamps `onboardingCompletedAt`; setting it back to `false` clears that timestamp.",
         "operationId": "updatePersonalization",
@@ -1351,9 +1313,7 @@
             }
           }
         },
-        "required": [
-          "error"
-        ]
+        "required": ["error"]
       },
       "Session": {
         "type": "object",
@@ -1425,11 +1385,7 @@
       },
       "RegisterInput": {
         "type": "object",
-        "required": [
-          "name",
-          "email",
-          "password"
-        ],
+        "required": ["name", "email", "password"],
         "properties": {
           "name": {
             "type": "string",
@@ -1571,11 +1527,7 @@
       },
       "CheckInCreateInput": {
         "type": "object",
-        "required": [
-          "mood",
-          "energy",
-          "stress"
-        ],
+        "required": ["mood", "energy", "stress"],
         "properties": {
           "mood": {
             "type": "number",
@@ -1616,10 +1568,7 @@
             "items": {
               "$ref": "#/components/schemas/Factor"
             },
-            "example": [
-              "ACADEMIC",
-              "SLEEP"
-            ]
+            "example": ["ACADEMIC", "SLEEP"]
           },
           "reflection": {
             "type": "string",
@@ -1691,11 +1640,7 @@
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "CHECK_IN",
-              "ACTION_LOG",
-              "INSIGHT"
-            ]
+            "enum": ["CHECK_IN", "ACTION_LOG", "INSIGHT"]
           },
           "id": {
             "type": "string"
@@ -1722,12 +1667,7 @@
       },
       "InsightType": {
         "type": "string",
-        "enum": [
-          "CORRELATION",
-          "TREND",
-          "PATTERN",
-          "REFLECTION"
-        ]
+        "enum": ["CORRELATION", "TREND", "PATTERN", "REFLECTION"]
       },
       "Metric": {
         "type": "string",
@@ -1887,11 +1827,7 @@
       },
       "ActionLogStatus": {
         "type": "string",
-        "enum": [
-          "STARTED",
-          "COMPLETED",
-          "SKIPPED"
-        ]
+        "enum": ["STARTED", "COMPLETED", "SKIPPED"]
       },
       "ActionLog": {
         "type": "object",
@@ -1937,9 +1873,7 @@
       },
       "ActionLogCreateInput": {
         "type": "object",
-        "required": [
-          "actionId"
-        ],
+        "required": ["actionId"],
         "properties": {
           "actionId": {
             "type": "string",
@@ -1950,16 +1884,11 @@
       },
       "ActionLogUpdateInput": {
         "type": "object",
-        "required": [
-          "status"
-        ],
+        "required": ["status"],
         "properties": {
           "status": {
             "type": "string",
-            "enum": [
-              "COMPLETED",
-              "SKIPPED"
-            ],
+            "enum": ["COMPLETED", "SKIPPED"],
             "description": "STARTED is set implicitly on create and can't be re-applied via PATCH."
           }
         }
@@ -1998,10 +1927,7 @@
           },
           "checkInFrequency": {
             "type": "string",
-            "enum": [
-              "DAILY",
-              "FEW_TIMES_A_WEEK"
-            ],
+            "enum": ["DAILY", "FEW_TIMES_A_WEEK"],
             "default": "DAILY"
           },
           "preferredCheckInTime": {
@@ -2041,10 +1967,7 @@
           },
           "checkInFrequency": {
             "type": "string",
-            "enum": [
-              "DAILY",
-              "FEW_TIMES_A_WEEK"
-            ]
+            "enum": ["DAILY", "FEW_TIMES_A_WEEK"]
           },
           "preferredCheckInTime": {
             "type": "string",
