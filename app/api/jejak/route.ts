@@ -5,6 +5,7 @@ import type { NextRequest } from "next/server";
 import { handleApiError, jsonError, parsePagination } from "@/lib/http";
 import { connectDB } from "@/lib/mongodb";
 import { getCurrentUserId } from "@/lib/session";
+import { ActionModel } from "@/models/Action";
 import { ActionLogModel } from "@/models/ActionLog";
 import { CheckInModel } from "@/models/CheckIn";
 import { InsightModel } from "@/models/Insight";
@@ -34,7 +35,15 @@ export async function GET(request: NextRequest) {
       ActionLogModel.find({ userId })
         .sort({ startedAt: -1 })
         .limit(fetchCount)
-        .populate("actionId", "title type durationMinutes")
+        // The model is passed explicitly rather than looked up by name: this
+        // route does not otherwise touch ActionModel, so in a fresh server
+        // process the schema would be unregistered and populate would throw
+        // MissingSchemaError.
+        .populate({
+          path: "actionId",
+          select: "title type durationMinutes",
+          model: ActionModel,
+        })
         .lean(),
       InsightModel.find({ userId })
         .sort({ createdAt: -1 })
