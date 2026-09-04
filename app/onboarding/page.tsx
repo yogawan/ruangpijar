@@ -29,6 +29,15 @@ const CHECK_IN_FREQUENCIES = [
   { value: "FEW_TIMES_A_WEEK", label: "Beberapa kali seminggu" },
 ] as const;
 
+// One step per personalization field. Nothing is submitted until the last
+// one, so the whole thing stays a single PATCH.
+const STEPS = [
+  "focusAreas",
+  "checkInFrequency",
+  "preferredCheckInTime",
+] as const;
+const LAST_STEP = STEPS.length - 1;
+
 const ERROR_BY_STATUS: Record<number, string> = {
   400: "Ada pilihan yang belum sesuai. Coba periksa lagi.",
 };
@@ -44,12 +53,15 @@ const ALERT_CLASS =
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const [settings, setSettings] = useState<Personalization | null>(null);
+  // Answers live here for the whole walk-through: a step that scrolls out of
+  // view is unmounted, so its inputs cannot hold the value themselves.
+  const [form, setForm] = useState<Personalization | null>(null);
+  const [step, setStep] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
   // GET upserts, so a first-time user still gets a defaulted document back
-  // and the form below always has something to prefill from.
+  // and every step always has something to prefill from.
   useEffect(() => {
     let active = true;
 
@@ -71,8 +83,17 @@ export default function OnboardingPage() {
           return;
         }
 
+        // Keep only what the walk-through edits. The response also carries
+        // _id, userId and timestamps, and the last step submits this object
+        // wholesale.
         const data = (await response.json()) as Personalization;
-        if (active) setSettings(data);
+        if (active) {
+          setForm({
+            focusAreas: data.focusAreas,
+            checkInFrequency: data.checkInFrequency,
+            preferredCheckInTime: data.preferredCheckInTime,
+          });
+        }
       } catch {
         if (active) {
           setError("Tidak bisa terhubung ke server. Periksa koneksimu.");
@@ -87,13 +108,34 @@ export default function OnboardingPage() {
     };
   }, [router]);
 
+  function toggleFocusArea(value: string) {
+    setForm((current) =>
+      current === null
+        ? current
+        : {
+            ...current,
+            focusAreas: current.focusAreas.includes(value)
+              ? current.focusAreas.filter((area) => area !== value)
+              : [...current.focusAreas, value],
+          },
+    );
+  }
+
+  function goBack() {
+    setError(null);
+    setStep((current) => current - 1);
+  }
+
+  // Submitting advances until the last step, so Enter moves forward too.
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const formData = new FormData(event.currentTarget);
-    const preferredCheckInTime = String(
-      formData.get("preferredCheckInTime") ?? "",
-    );
+    if (step < LAST_STEP) {
+      setStep((current) => current + 1);
+      return;
+    }
+
+    if (!form) return;
 
     setError(null);
     setPending(true);
@@ -102,14 +144,7 @@ export default function OnboardingPage() {
       const response = await fetch("/api/personalization", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          focusAreas: formData.getAll("focusAreas"),
-          checkInFrequency: formData.get("checkInFrequency"),
-          // The field is nullable — an empty time input means "no preference"
-          // rather than an empty string.
-          preferredCheckInTime: preferredCheckInTime || null,
-          onboardingCompleted: true,
-        }),
+        body: JSON.stringify({ ...form, onboardingCompleted: true }),
       });
 
       if (response.status === 401) {
@@ -134,7 +169,7 @@ export default function OnboardingPage() {
     }
   }
 
-  if (!settings) {
+  if (!form) {
     return (
       <main className="flex min-h-screen items-center justify-center px-6 py-12">
         <div className="w-full max-w-md text-center">
@@ -171,6 +206,25 @@ export default function OnboardingPage() {
           </p>
         </div>
 
+        {/* Progress. The bar repeats what the counter already says, so it is
+            decorative — the count is what gets announced. */}
+        <div className="mb-6">
+          <p aria-live="polite" className="mb-3 text-xs text-muted-foreground">
+            Langkah {step + 1} dari {STEPS.length}
+          </p>
+
+          <div aria-hidden="true" className="flex gap-2">
+            {STEPS.map((name, index) => (
+              <span
+                key={name}
+                className={`h-1 flex-1 rounded-full transition-colors ${
+                  index <= step ? "bg-primary" : "bg-primary/20"
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+
         {error ? (
           <p role="alert" className={ALERT_CLASS}>
             {error}
@@ -179,84 +233,116 @@ export default function OnboardingPage() {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-5">
-          <fieldset className="space-y-2">
-            <legend className="text-sm font-medium">
-              Apa yang ingin kamu perhatikan?
-            </legend>
+          {step === 0 ? (
+            <fieldset className="space-y-2">
+              <legend className="text-sm font-medium">
+                Apa yang ingin kamu perhatikan?
+              </legend>
 
-            <p className="text-xs text-muted-foreground">
-              Pilih yang paling terasa. Bisa lebih dari satu, bisa juga
-              dilewati.
-            </p>
+              <p className="text-xs text-muted-foreground">
+                Pilih yang paling terasa. Bisa lebih dari satu, bisa juga
+                dilewati.
+              </p>
 
-            <div className="grid grid-cols-2 gap-2 pt-1">
-              {FOCUS_AREAS.map((area) => (
-                <label key={area.value} className={CHOICE_CLASS}>
-                  <input
-                    type="checkbox"
-                    name="focusAreas"
-                    value={area.value}
-                    defaultChecked={settings.focusAreas.includes(area.value)}
-                    className="size-4 accent-primary"
-                  />
-                  {area.label}
-                </label>
-              ))}
+              <div className="grid grid-cols-2 gap-2 pt-1">
+                {FOCUS_AREAS.map((area) => (
+                  <label key={area.value} className={CHOICE_CLASS}>
+                    <input
+                      type="checkbox"
+                      name="focusAreas"
+                      value={area.value}
+                      checked={form.focusAreas.includes(area.value)}
+                      onChange={() => toggleFocusArea(area.value)}
+                      className="size-4 accent-primary"
+                    />
+                    {area.label}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          ) : null}
+
+          {step === 1 ? (
+            <fieldset className="space-y-2">
+              <legend className="text-sm font-medium">
+                Seberapa sering ingin check-in?
+              </legend>
+
+              <p className="text-xs text-muted-foreground">
+                Tidak mengikat — ini hanya jadi patokan pengingat.
+              </p>
+
+              <div className="space-y-2 pt-1">
+                {CHECK_IN_FREQUENCIES.map((frequency) => (
+                  <label key={frequency.value} className={CHOICE_CLASS}>
+                    <input
+                      type="radio"
+                      name="checkInFrequency"
+                      value={frequency.value}
+                      checked={form.checkInFrequency === frequency.value}
+                      onChange={() =>
+                        setForm({ ...form, checkInFrequency: frequency.value })
+                      }
+                      className="size-4 accent-primary"
+                    />
+                    {frequency.label}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          ) : null}
+
+          {step === 2 ? (
+            <div className="space-y-2">
+              <label
+                htmlFor="preferredCheckInTime"
+                className="text-sm font-medium"
+              >
+                Waktu yang paling pas
+              </label>
+
+              <p className="text-xs text-muted-foreground">
+                Boleh dikosongkan kalau belum yakin.
+              </p>
+
+              <input
+                id="preferredCheckInTime"
+                name="preferredCheckInTime"
+                type="time"
+                value={form.preferredCheckInTime ?? ""}
+                onChange={(event) =>
+                  setForm({
+                    ...form,
+                    // The field is nullable — an emptied input means "no
+                    // preference" rather than an empty string.
+                    preferredCheckInTime: event.target.value || null,
+                  })
+                }
+                className={FIELD_CLASS}
+              />
             </div>
-          </fieldset>
+          ) : null}
 
-          <fieldset className="space-y-2">
-            <legend className="text-sm font-medium">
-              Seberapa sering ingin check-in?
-            </legend>
+          <div className="flex gap-3 pt-1">
+            {step > 0 ? (
+              <button
+                type="button"
+                onClick={goBack}
+                disabled={pending}
+                className="flex-1 rounded-xl border border-border px-4 py-3 font-medium transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Kembali
+              </button>
+            ) : null}
 
-            <div className="space-y-2 pt-1">
-              {CHECK_IN_FREQUENCIES.map((frequency) => (
-                <label key={frequency.value} className={CHOICE_CLASS}>
-                  <input
-                    type="radio"
-                    name="checkInFrequency"
-                    value={frequency.value}
-                    defaultChecked={
-                      settings.checkInFrequency === frequency.value
-                    }
-                    required
-                    className="size-4 accent-primary"
-                  />
-                  {frequency.label}
-                </label>
-              ))}
-            </div>
-          </fieldset>
-
-          <div className="space-y-2">
-            <label
-              htmlFor="preferredCheckInTime"
-              className="text-sm font-medium"
+            <button
+              type="submit"
+              disabled={pending}
+              className="flex-1 rounded-xl bg-primary px-4 py-3 font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Waktu yang paling pas
-            </label>
-
-            <input
-              id="preferredCheckInTime"
-              name="preferredCheckInTime"
-              type="time"
-              defaultValue={settings.preferredCheckInTime ?? ""}
-              className={FIELD_CLASS}
-            />
-
-            <p className="text-xs text-muted-foreground">
-              Boleh dikosongkan kalau belum yakin.
-            </p>
+              {step < LAST_STEP ? "Lanjut" : pending ? "Menyimpan…" : "Selesai"}
+            </button>
           </div>
-
-          <button
-            type="submit"
-            disabled={pending}
-            className="w-full rounded-xl bg-primary px-4 py-3 font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {pending ? "Menyimpan…" : "Selesai"}
-          </button>
         </form>
 
         <p className="mt-8 text-center text-sm text-muted-foreground">
