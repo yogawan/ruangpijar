@@ -1,3 +1,4 @@
+// @/app/auth/login/page.tsx
 "use client";
 
 import Image from "next/image";
@@ -48,16 +49,13 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="mb-8 text-center">
-          <Link
-            href="/"
-            className="text-2xl font-bold tracking-tight text-foreground"
-          >
+          <Link href="/" className="inline-block">
             <Image
               src="/ruang_pijar_logo.png"
               alt="RuangPijar"
               width={478}
               height={476}
-              className="h-10 w-10 object-contain"
+              className="h-20 w-20 object-contain"
             />
           </Link>
 
