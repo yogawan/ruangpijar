@@ -32,7 +32,18 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="id"
       className={`${sora.variable} ${plusJakartaSans.variable} ${jetBrainsMono.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col font-sans">{children}</body>
+      <body className="flex min-h-full flex-col font-sans">
+        {/* globals.css hides the scroll-reveal targets so GSAP can bring them
+            in. Without JS that animation never runs, so restore them here. */}
+        <noscript>
+          <style>
+            {
+              "[data-hero-item],[data-hero-visual],[data-reveal],[data-reveal-stagger] > *,[data-count]{opacity:1}"
+            }
+          </style>
+        </noscript>
+        {children}
+      </body>
     </html>
   );
 }

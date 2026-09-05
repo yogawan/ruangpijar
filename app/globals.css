@@ -88,6 +88,38 @@ body {
   color: var(--text-main);
 }
 
+/* Scroll-reveal resting states. `components/ScrollAnimations.tsx` animates
+   these open; they start hidden here rather than in JS so nothing flashes
+   between first paint and hydration. The <noscript> block in app/layout.tsx
+   restores them when JS never runs. */
+[data-hero-item],
+[data-hero-visual],
+[data-reveal],
+[data-reveal-stagger] > *,
+[data-count] {
+  opacity: 0;
+}
+
+[data-header] {
+  transition:
+    box-shadow 0.3s ease,
+    backdrop-filter 0.3s ease;
+}
+
+[data-header] nav {
+  transition: height 0.3s ease;
+}
+
+[data-header].is-scrolled {
+  box-shadow: 0 1px 16px rgb(41 37 37 / 8%);
+  backdrop-filter: blur(10px);
+}
+
+/* Outranks Tailwind's `h-20` on specificity alone, so no !important needed. */
+[data-header].is-scrolled nav {
+  height: 4rem;
+}
+
 :focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 3px;
@@ -105,6 +137,16 @@ body {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+
+  /* Reveal targets are hidden by default for the GSAP entrance. Without this
+     they would stay invisible, since that branch never runs here. */
+  [data-hero-item],
+  [data-hero-visual],
+  [data-reveal],
+  [data-reveal-stagger] > *,
+  [data-count] {
+    opacity: 1 !important;
   }
   /* biome-ignore-end lint/complexity/noImportantStyles: end of reduced-motion reset. */
 }
