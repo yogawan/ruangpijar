@@ -1,6 +1,7 @@
 // @/app/insight/[id]/page.tsx
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -179,7 +180,13 @@ export default function InsightDetailPage() {
             href="/"
             className="text-2xl font-bold tracking-tight text-foreground"
           >
-            RuangPijar
+            <Image
+              src="/ruang_pijar_logo.png"
+              alt="RuangPijar"
+              width={478}
+              height={476}
+              className="h-10 w-10 object-contain"
+            />
           </Link>
 
           <h1 className="mt-8 text-3xl font-bold tracking-tight">
