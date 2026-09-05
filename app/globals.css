@@ -3,38 +3,45 @@
 /* Semantic design tokens. Components reference these through Tailwind
    utilities (bg-surface, text-text-muted, ...) instead of raw colors. */
 :root {
-  --background: #fbfbfa;
+  --background: #faf8f4;
   --surface: #ffffff;
-  --text-main: #101617;
-  --text-muted: #576263;
-  --primary: #0f766e;
+  --surface-muted: #eee5ec;
+  --peach-subtle: #f8e7df;
+  --sage: #8fa58d;
+  --sage-soft: #e7efe5;
+  --text-main: #292525;
+  --text-muted: #746e6a;
+  --primary: #5b3a52;
+  --primary-hover: #432b3d;
+  --accent: #e9a68d;
   --primary-contrast: #ffffff;
   --ai-accent: #6d28d9;
-  --border-glass: rgb(16 22 23 / 0.09);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #080b0c;
-    --surface: #12181a;
-    --text-main: #e9eeef;
-    --text-muted: #97a4a6;
-    --primary: #2dd4bf;
-    --primary-contrast: #04211f;
-    --ai-accent: #a78bfa;
-    --border-glass: rgb(233 238 239 / 0.1);
-  }
+  --border-glass: #e8e2dc;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-peach-subtle: var(--peach-subtle);
+  --color-sage: var(--sage);
+  --color-sage-soft: var(--sage-soft);
   --color-text-main: var(--text-main);
   --color-text-muted: var(--text-muted);
   --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-contrast);
+  --color-brand: var(--primary);
+  --color-brand-hover: var(--primary-hover);
+  --color-brand-subtle: var(--surface-muted);
+  --color-accent: var(--accent);
   --color-primary-contrast: var(--primary-contrast);
   --color-ai-accent: var(--ai-accent);
   --color-border-glass: var(--border-glass);
+  --color-border: var(--border-glass);
+  --color-foreground: var(--text-main);
+  --color-muted-foreground: var(--text-muted);
+  --color-muted: var(--surface-muted);
+  --color-card: var(--surface);
 
   --font-display: var(--font-sora);
   --font-sans: var(--font-plus-jakarta-sans);
