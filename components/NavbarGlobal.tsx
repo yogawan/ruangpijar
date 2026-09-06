@@ -23,10 +23,13 @@ const APP_ITEMS = [
   { href: "/profile", label: "Profil", Icon: CircleUser },
 ];
 
+// "Tentang RuangPijar" points at the /about page rather than the landing's
+// own #tentang section: both answer the same question, and offering the two
+// side by side would only make a reader pick between them.
 const MARKETING_LINKS = [
   { href: "/#beranda", label: "Beranda" },
   { href: "/#cara-kerja", label: "Cara Kerja" },
-  { href: "/#tentang", label: "Tentang RuangPijar" },
+  { href: "/about", label: "Tentang RuangPijar" },
   { href: "/#fitur", label: "Fitur" },
 ];
 
@@ -136,6 +139,12 @@ export default function NavbarGlobal({ variant }: NavbarGlobalProps) {
                   className="rounded-lg px-3 py-2 hover:bg-surface-muted"
                 >
                   Fitur
+                </Link>
+                <Link
+                  href="/about"
+                  className="rounded-lg px-3 py-2 hover:bg-surface-muted"
+                >
+                  Tentang RuangPijar
                 </Link>
                 <Link
                   href="/auth/register"

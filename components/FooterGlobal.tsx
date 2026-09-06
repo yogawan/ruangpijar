@@ -45,7 +45,7 @@ export default function FooterGlobal() {
             <Link href="/#beranda">Beranda</Link>
             <Link href="/#cara-kerja">Cara Kerja</Link>
             <Link href="/#fitur">Fitur</Link>
-            <Link href="/#tentang">Tentang</Link>
+            <Link href="/about">Tentang</Link>
           </div>
         </div>
 
