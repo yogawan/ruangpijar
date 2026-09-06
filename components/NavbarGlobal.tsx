@@ -26,8 +26,8 @@ const APP_ITEMS = [
 const MARKETING_LINKS = [
   { href: "/#beranda", label: "Beranda" },
   { href: "/#cara-kerja", label: "Cara Kerja" },
-  { href: "/#fitur", label: "Fitur" },
   { href: "/#tentang", label: "Tentang RuangPijar" },
+  { href: "/#fitur", label: "Fitur" },
 ];
 
 type NavbarGlobalProps = {
