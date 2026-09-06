@@ -55,10 +55,10 @@ const principles = [
 ];
 
 const team = [
-  ["Yogawan", "Frontend & UI/UX", "/Yogawan.png"],
-  ["Ridho", "Frontend", "/Ridho.png"],
-  ["Gading", "Backend", "/Gading.png"],
-  ["Latief", "Backend", "/Latief.png"],
+  ["Yogawan A. P. T.", "Frontend & UI/UX", "/Yogawan.png"],
+  ["Ridho E.", "Frontend", "/Ridho.png"],
+  ["A. Gading S.", "Backend", "/Gading.png"],
+  ["Latief R. S.", "Backend", "/Latief.png"],
 ];
 
 export default function AboutPage() {
