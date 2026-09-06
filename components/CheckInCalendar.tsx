@@ -128,11 +128,16 @@ export default function CheckInCalendar({
                 }${
                   entries.length > 1 ? `, ${entries.length} check-in` : ""
                 }. Lihat detail.`}
-                className={`${base} cursor-pointer border border-border bg-surface hover:border-primary/50 hover:bg-surface-muted ${
-                  isToday ? "ring-1 ring-inset ring-primary" : ""
+                // Filled in solid primary so the days holding a check-in
+                // read as the month's shape at a glance. Everything inside
+                // therefore has to invert: today's ring, the day number and
+                // the count below were all primary-coloured, which would
+                // disappear against this.
+                className={`${base} cursor-pointer border border-primary bg-primary text-primary-foreground hover:bg-brand-hover ${
+                  isToday ? "ring-1 ring-inset ring-primary-foreground/70" : ""
                 }`}
               >
-                <span className="text-[0.6875rem] leading-none text-muted-foreground">
+                <span className="text-[0.6875rem] leading-none text-primary-foreground/75">
                   {date.getDate()}
                 </span>
 
@@ -145,7 +150,7 @@ export default function CheckInCalendar({
                 {entries.length > 1 ? (
                   <span
                     aria-hidden="true"
-                    className="absolute right-1 top-1 rounded-full bg-primary px-1 text-[0.5625rem] font-medium leading-tight text-primary-foreground"
+                    className="absolute right-1 top-1 rounded-full bg-primary-foreground px-1 text-[0.5625rem] font-medium leading-tight text-primary"
                   >
                     {entries.length}
                   </span>
