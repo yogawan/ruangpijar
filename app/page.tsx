@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import NavbarGlobal from "@/components/NavbarGlobal";
 import ScrollAnimations from "@/components/ScrollAnimations";
+import SplashScreen from "@/components/SplashScreen";
 
 const problemCards = [
   [
@@ -87,7 +88,8 @@ const features = [
 export default function HomePage() {
   return (
     <>
-      <ScrollAnimations />
+      <SplashScreen />
+      <ScrollAnimations waitForSplash />
       {/* Kept outside <main> on purpose: `overflow-hidden` there would make
           this a sticky child of a clipped box and it would stop sticking. */}
       <NavbarGlobal variant="marketing" />

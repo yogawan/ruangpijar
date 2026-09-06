@@ -4,6 +4,7 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useRef } from "react";
+import { onSplashDone, SPLASH_HOLD_MS, SPLASH_ZOOM_MS } from "@/lib/splash";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -35,8 +36,16 @@ const HIDDEN =
  * - `data-count`         pops in (used for the big 01–04 numerals)
  * - `data-parallax`      drifts with scroll
  * - `data-header`        gains `.is-scrolled` past 80px
+ *
+ * `waitForSplash` holds the above-the-fold entrance until `SplashScreen` has
+ * lifted. Without it that animation runs behind the overlay and is over by
+ * the time anyone can see it.
  */
-export default function ScrollAnimations() {
+export default function ScrollAnimations({
+  waitForSplash = false,
+}: {
+  waitForSplash?: boolean;
+}) {
   const progressRef = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
@@ -64,30 +73,59 @@ export default function ScrollAnimations() {
     });
 
     mm.add("(prefers-reduced-motion: no-preference)", () => {
-      const heroItems = gsap.utils.toArray<HTMLElement>("[data-hero-item]");
-      if (heroItems.length > 0) {
-        gsap.fromTo(
-          heroItems,
-          { opacity: 0, y: DISTANCE },
-          {
-            opacity: 1,
-            y: 0,
-            duration: DURATION,
-            ease: EASE,
-            stagger: STAGGER,
-            delay: 0.15,
-          },
-        );
+      let entranceStarted = false;
+
+      function runHeroEntrance() {
+        if (entranceStarted) return;
+        entranceStarted = true;
+
+        const heroItems = gsap.utils.toArray<HTMLElement>("[data-hero-item]");
+        if (heroItems.length > 0) {
+          gsap.fromTo(
+            heroItems,
+            { opacity: 0, y: DISTANCE },
+            {
+              opacity: 1,
+              y: 0,
+              duration: DURATION,
+              ease: EASE,
+              stagger: STAGGER,
+              delay: 0.15,
+            },
+          );
+        }
+
+        const heroVisual =
+          document.querySelector<HTMLElement>("[data-hero-visual]");
+        if (heroVisual) {
+          gsap.fromTo(
+            heroVisual,
+            { opacity: 0, scale: 0.96 },
+            { opacity: 1, scale: 1, duration: 0.9, ease: EASE, delay: 0.25 },
+          );
+        }
+
+        // The splash locks body scrolling while it is up, which changes the
+        // layout width. Re-measure now that it is gone.
+        ScrollTrigger.refresh();
       }
 
-      const heroVisual =
-        document.querySelector<HTMLElement>("[data-hero-visual]");
-      if (heroVisual) {
-        gsap.fromTo(
-          heroVisual,
-          { opacity: 0, scale: 0.96 },
-          { opacity: 1, scale: 1, duration: 0.9, ease: EASE, delay: 0.25 },
+      let unsubscribe: (() => void) | undefined;
+      let failsafe: ReturnType<typeof setTimeout> | undefined;
+
+      if (waitForSplash) {
+        unsubscribe = onSplashDone(runHeroEntrance);
+
+        // globals.css parks these elements at opacity 0 for this animation to
+        // bring in, so a splash that never reported done would leave the hero
+        // invisible for good. Start it regardless once the splash has had
+        // longer than it could legitimately need.
+        failsafe = setTimeout(
+          runHeroEntrance,
+          SPLASH_HOLD_MS + SPLASH_ZOOM_MS + 1000,
         );
+      } else {
+        runHeroEntrance();
       }
 
       for (const el of gsap.utils.toArray<HTMLElement>("[data-reveal]")) {
@@ -164,6 +202,13 @@ export default function ScrollAnimations() {
             header.classList.toggle("is-scrolled", self.isActive),
         });
       }
+
+      // matchMedia re-runs this branch whenever the query flips, so the
+      // pending splash subscription has to be dropped with it.
+      return () => {
+        unsubscribe?.();
+        if (failsafe) clearTimeout(failsafe);
+      };
     });
 
     // Webfonts land after hydration and reflow the page, which would leave
