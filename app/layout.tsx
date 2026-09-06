@@ -22,7 +22,7 @@ const jetBrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "RuangPijar — Ruang Aman untuk Pikiran yang Bising",
+  title: "RuangPijar - Ruang Aman untuk Pikiran yang Bising",
   description:
     "Jurnal visual tanpa distraksi yang mengerti perasaanmu. Ditenagai AI untuk validasi emosi seketika, diamankan oleh jaringan Web3 untuk privasi mutlak.",
 };
