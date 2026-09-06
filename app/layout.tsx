@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { JetBrains_Mono, Plus_Jakarta_Sans, Sora } from "next/font/google";
+import FooterGlobal from "@/components/FooterGlobal";
 import "./globals.css";
 
 const sora = Sora({
@@ -43,6 +44,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           </style>
         </noscript>
         {children}
+        <FooterGlobal />
       </body>
     </html>
   );

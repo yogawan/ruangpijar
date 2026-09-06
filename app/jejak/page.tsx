@@ -1,11 +1,10 @@
 // @/app/jejak/page.tsx
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import AppNav from "@/components/AppNav";
+import NavbarGlobal from "@/components/NavbarGlobal";
 import { actionTypeLabel } from "@/lib/action-labels";
 import {
   type CheckIn,
@@ -168,196 +167,197 @@ export default function JejakPage() {
 
   if (items === null) {
     return (
-      <main className="flex min-h-screen items-center justify-center px-6 py-12">
-        <div className="w-full max-w-md text-center">
-          {error ? (
-            <p role="alert" className={ALERT_CLASS}>
-              {error}
-            </p>
-          ) : (
-            <p className="text-sm text-muted-foreground">Memuat jejakmu…</p>
-          )}
-        </div>
-      </main>
+      <>
+        <NavbarGlobal variant="app" />
+
+        <main className="flex flex-1 items-center justify-center px-6 py-12">
+          <div className="w-full max-w-md text-center">
+            {error ? (
+              <p role="alert" className={ALERT_CLASS}>
+                {error}
+              </p>
+            ) : (
+              <p className="text-sm text-muted-foreground">Memuat jejakmu…</p>
+            )}
+          </div>
+        </main>
+      </>
     );
   }
 
   return (
-    <main className="flex min-h-screen justify-center px-6 py-12">
-      <div className="w-full max-w-md">
-        {/* Header */}
-        <div className="mb-8 text-center">
-          <Link href="/" className="inline-block">
-            <Image
-              src="/ruang_pijar_logo.png"
-              alt="RuangPijar"
-              width={478}
-              height={476}
-              className="h-20 w-20 object-contain"
-            />
-          </Link>
+    <>
+      <NavbarGlobal variant="app" />
 
-          <AppNav />
+      <main className="flex flex-1 justify-center px-6 py-12">
+        <div className="w-full max-w-md">
+          {/* Header */}
+          <div className="mb-8 text-center">
+            <h1 className="text-3xl font-bold tracking-tight">Jejak</h1>
 
-          <h1 className="mt-8 text-3xl font-bold tracking-tight">Jejak</h1>
-
-          <p className="mt-2 text-sm text-muted-foreground">
-            Check-in, latihan, dan insight kamu dalam satu urutan.
-          </p>
-        </div>
-
-        {error ? (
-          <p role="alert" className={`mb-5 ${ALERT_CLASS}`}>
-            {error}
-          </p>
-        ) : null}
-
-        {items.length === 0 ? (
-          <div className={`${CARD_CLASS} py-10 text-center`}>
-            <p className="text-sm font-medium">Belum ada jejak</p>
-
-            <p className={`mt-2 ${HINT_CLASS}`}>
-              Begitu kamu menulis check-in pertama, jejaknya muncul di sini.
+            <p className="mt-2 text-sm text-muted-foreground">
+              Check-in, latihan, dan insight kamu dalam satu urutan.
             </p>
-
-            <Link
-              href="/check-in"
-              className="mt-5 inline-block rounded-xl bg-primary px-4 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
-            >
-              Mulai check-in
-            </Link>
           </div>
-        ) : (
-          <ul className="space-y-3">
-            {items.map((entry) => {
-              if (entry.type === "CHECK_IN") {
-                const checkIn = entry.data;
-                const mood = moodFor(checkIn.mood);
+
+          {error ? (
+            <p role="alert" className={`mb-5 ${ALERT_CLASS}`}>
+              {error}
+            </p>
+          ) : null}
+
+          {items.length === 0 ? (
+            <div className={`${CARD_CLASS} py-10 text-center`}>
+              <p className="text-sm font-medium">Belum ada jejak</p>
+
+              <p className={`mt-2 ${HINT_CLASS}`}>
+                Begitu kamu menulis check-in pertama, jejaknya muncul di sini.
+              </p>
+
+              <Link
+                href="/check-in"
+                className="mt-5 inline-block rounded-xl bg-primary px-4 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+              >
+                Mulai check-in
+              </Link>
+            </div>
+          ) : (
+            <ul className="space-y-3">
+              {items.map((entry) => {
+                if (entry.type === "CHECK_IN") {
+                  const checkIn = entry.data;
+                  const mood = moodFor(checkIn.mood);
+
+                  return (
+                    <li key={`${entry.type}-${entry.id}`}>
+                      <Link
+                        href={`/check-in/${checkIn._id}`}
+                        className={LINK_CARD_CLASS}
+                      >
+                        <EntryHeader entry={entry} />
+
+                        <div className="mt-2 flex items-center gap-3">
+                          <span aria-hidden="true" className="text-2xl">
+                            {mood?.emoji ?? "•"}
+                          </span>
+
+                          <p className="text-sm font-medium">
+                            {mood?.label ?? `Mood ${checkIn.mood}`}
+                          </p>
+                        </div>
+
+                        <dl className="mt-4 grid grid-cols-3 gap-3">
+                          {statsFor(checkIn).map((stat) => (
+                            <div key={stat.label}>
+                              <dt className={HINT_CLASS}>{stat.label}</dt>
+                              <dd className="text-sm font-medium">
+                                {stat.value}
+                              </dd>
+                            </div>
+                          ))}
+                        </dl>
+
+                        {checkIn.factors.length > 0 ? (
+                          <ul className="mt-4 flex flex-wrap gap-2">
+                            {checkIn.factors.map((factor) => (
+                              <li
+                                key={factor}
+                                className="rounded-full border border-border px-3 py-1 text-xs"
+                              >
+                                {factorLabel(factor)}
+                              </li>
+                            ))}
+                          </ul>
+                        ) : null}
+
+                        {checkIn.reflection ? (
+                          <p className="mt-4 whitespace-pre-line text-sm leading-relaxed">
+                            {checkIn.reflection}
+                          </p>
+                        ) : null}
+                      </Link>
+                    </li>
+                  );
+                }
+
+                if (entry.type === "ACTION_LOG") {
+                  const log = entry.data;
+
+                  return (
+                    <li
+                      key={`${entry.type}-${entry.id}`}
+                      className={CARD_CLASS}
+                    >
+                      <EntryHeader
+                        entry={entry}
+                        extra={ACTION_STATUS_LABEL[log.status]}
+                      />
+
+                      <p className="mt-2 text-sm font-medium">
+                        {log.actionId?.title ?? "Latihan yang sudah dihapus"}
+                      </p>
+
+                      {log.actionId ? (
+                        <p className={`mt-2 ${HINT_CLASS}`}>
+                          {actionTypeLabel(log.actionId.type)}
+                          {log.actionId.durationMinutes !== null
+                            ? ` · ${log.actionId.durationMinutes} menit`
+                            : ""}
+                        </p>
+                      ) : null}
+                    </li>
+                  );
+                }
+
+                const insight = entry.data;
 
                 return (
                   <li key={`${entry.type}-${entry.id}`}>
                     <Link
-                      href={`/check-in/${checkIn._id}`}
+                      href={`/insight/${insight._id}`}
                       className={LINK_CARD_CLASS}
                     >
-                      <EntryHeader entry={entry} />
+                      <EntryHeader
+                        entry={entry}
+                        extra={insightTypeLabel(insight.type)}
+                      />
 
-                      <div className="mt-2 flex items-center gap-3">
-                        <span aria-hidden="true" className="text-2xl">
-                          {mood?.emoji ?? "•"}
-                        </span>
+                      <p className="mt-2 text-sm font-medium">
+                        {insight.title}
+                      </p>
 
-                        <p className="text-sm font-medium">
-                          {mood?.label ?? `Mood ${checkIn.mood}`}
-                        </p>
-                      </div>
-
-                      <dl className="mt-4 grid grid-cols-3 gap-3">
-                        {statsFor(checkIn).map((stat) => (
-                          <div key={stat.label}>
-                            <dt className={HINT_CLASS}>{stat.label}</dt>
-                            <dd className="text-sm font-medium">
-                              {stat.value}
-                            </dd>
-                          </div>
-                        ))}
-                      </dl>
-
-                      {checkIn.factors.length > 0 ? (
-                        <ul className="mt-4 flex flex-wrap gap-2">
-                          {checkIn.factors.map((factor) => (
-                            <li
-                              key={factor}
-                              className="rounded-full border border-border px-3 py-1 text-xs"
-                            >
-                              {factorLabel(factor)}
-                            </li>
-                          ))}
-                        </ul>
-                      ) : null}
-
-                      {checkIn.reflection ? (
-                        <p className="mt-4 whitespace-pre-line text-sm leading-relaxed">
-                          {checkIn.reflection}
-                        </p>
-                      ) : null}
+                      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                        {insight.description}
+                      </p>
                     </Link>
                   </li>
                 );
-              }
+              })}
+            </ul>
+          )}
 
-              if (entry.type === "ACTION_LOG") {
-                const log = entry.data;
+          {hasMore ? (
+            <button
+              type="button"
+              onClick={loadMore}
+              disabled={loadingMore}
+              className="mt-4 w-full rounded-xl border border-border px-4 py-3 font-medium transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {loadingMore ? "Memuat…" : "Muat lebih banyak"}
+            </button>
+          ) : null}
 
-                return (
-                  <li key={`${entry.type}-${entry.id}`} className={CARD_CLASS}>
-                    <EntryHeader
-                      entry={entry}
-                      extra={ACTION_STATUS_LABEL[log.status]}
-                    />
-
-                    <p className="mt-2 text-sm font-medium">
-                      {log.actionId?.title ?? "Latihan yang sudah dihapus"}
-                    </p>
-
-                    {log.actionId ? (
-                      <p className={`mt-2 ${HINT_CLASS}`}>
-                        {actionTypeLabel(log.actionId.type)}
-                        {log.actionId.durationMinutes !== null
-                          ? ` · ${log.actionId.durationMinutes} menit`
-                          : ""}
-                      </p>
-                    ) : null}
-                  </li>
-                );
-              }
-
-              const insight = entry.data;
-
-              return (
-                <li key={`${entry.type}-${entry.id}`}>
-                  <Link
-                    href={`/insight/${insight._id}`}
-                    className={LINK_CARD_CLASS}
-                  >
-                    <EntryHeader
-                      entry={entry}
-                      extra={insightTypeLabel(insight.type)}
-                    />
-
-                    <p className="mt-2 text-sm font-medium">{insight.title}</p>
-
-                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                      {insight.description}
-                    </p>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-
-        {hasMore ? (
-          <button
-            type="button"
-            onClick={loadMore}
-            disabled={loadingMore}
-            className="mt-4 w-full rounded-xl border border-border px-4 py-3 font-medium transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {loadingMore ? "Memuat…" : "Muat lebih banyak"}
-          </button>
-        ) : null}
-
-        <p className="mt-8 text-center text-sm text-muted-foreground">
-          Ingin menulis lagi?{" "}
-          <Link
-            href="/check-in"
-            className="font-medium text-primary hover:underline"
-          >
-            Check-in
-          </Link>
-        </p>
-      </div>
-    </main>
+          <p className="mt-8 text-center text-sm text-muted-foreground">
+            Ingin menulis lagi?{" "}
+            <Link
+              href="/check-in"
+              className="font-medium text-primary hover:underline"
+            >
+              Check-in
+            </Link>
+          </p>
+        </div>
+      </main>
+    </>
   );
 }

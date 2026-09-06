@@ -1,6 +1,7 @@
-import { ArrowRight, Menu, TrendingUp } from "lucide-react";
+import { ArrowRight, TrendingUp } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import NavbarGlobal from "@/components/NavbarGlobal";
 import ScrollAnimations from "@/components/ScrollAnimations";
 
 const problemCards = [
@@ -89,74 +90,7 @@ export default function HomePage() {
       <ScrollAnimations />
       {/* Kept outside <main> on purpose: `overflow-hidden` there would make
           this a sticky child of a clipped box and it would stop sticking. */}
-      <header
-        data-header
-        className="sticky top-0 z-30 border-border/90 border-b bg-background/95"
-      >
-        <nav
-          className="mx-auto flex h-20 max-w-6xl items-center justify-between px-5 sm:px-8"
-          aria-label="Navigasi utama"
-        >
-          <Link href="/" className="font-display text-2xl text-brand">
-            <Image
-              src="/ruang_pijar_logo.png"
-              alt="RuangPijar"
-              width={478}
-              height={476}
-              className="h-11 w-11 object-contain"
-            />
-          </Link>
-          <div className="hidden items-center gap-7 text-sm text-muted-foreground md:flex">
-            <a href="#beranda" className="transition-colors hover:text-brand">
-              Beranda
-            </a>
-            <a
-              href="#cara-kerja"
-              className="transition-colors hover:text-brand"
-            >
-              Cara Kerja
-            </a>
-            <a href="#fitur" className="transition-colors hover:text-brand">
-              Fitur
-            </a>
-            <a href="#tentang" className="transition-colors hover:text-brand">
-              Tentang RuangPijar
-            </a>
-          </div>
-          <Link
-            href="/auth/register"
-            className="hidden rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-brand-hover sm:inline-flex"
-          >
-            Mulai Check-in
-          </Link>
-          <details className="relative md:hidden">
-            <summary className="flex cursor-pointer list-none items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-foreground">
-              <Menu className="h-4 w-4" aria-hidden="true" />
-              Menu
-            </summary>
-            <div className="absolute right-0 z-20 mt-2 grid w-48 gap-1 rounded-xl border border-border bg-surface p-2 text-sm shadow-md">
-              <a
-                href="#cara-kerja"
-                className="rounded-lg px-3 py-2 hover:bg-surface-muted"
-              >
-                Cara Kerja
-              </a>
-              <a
-                href="#fitur"
-                className="rounded-lg px-3 py-2 hover:bg-surface-muted"
-              >
-                Fitur
-              </a>
-              <Link
-                href="/auth/register"
-                className="rounded-lg bg-brand px-3 py-2 text-primary-foreground"
-              >
-                Mulai Check-in
-              </Link>
-            </div>
-          </details>
-        </nav>
-      </header>
+      <NavbarGlobal variant="marketing" />
 
       <main className="overflow-hidden bg-background text-foreground">
         <section
@@ -612,55 +546,6 @@ export default function HomePage() {
             </div>
           </div>
         </section>
-
-        <footer className="border-t border-border bg-surface">
-          <div
-            data-reveal-stagger
-            className="mx-auto grid max-w-6xl gap-10 px-5 py-14 sm:px-8 md:grid-cols-[1.6fr_1fr_1fr]"
-          >
-            <div>
-              <Link href="/" className="font-display text-2xl text-brand">
-                <Image
-                  src="/ruang_pijar_logo.png"
-                  alt="RuangPijar"
-                  width={478}
-                  height={476}
-                  className="h-10 w-10 object-contain"
-                />
-              </Link>
-              <p className="mt-3 max-w-xs text-sm leading-6 text-muted-foreground">
-                Ruang kecil untuk memahami dirimu.
-              </p>
-            </div>
-            <div>
-              <p className="text-sm font-semibold">RuangPijar</p>
-              <div className="mt-4 grid gap-3 text-sm text-muted-foreground">
-                <a href="#beranda">Beranda</a>
-                <a href="#cara-kerja">Cara Kerja</a>
-                <a href="#fitur">Fitur</a>
-                <a href="#tentang">Tentang</a>
-              </div>
-            </div>
-            <div>
-              <p className="text-sm font-semibold">Dukungan</p>
-              <div className="mt-4 grid gap-3 text-sm text-muted-foreground">
-                <a href="mailto:halo@ruangpijar.id">Pusat Bantuan</a>
-                <a href="#tentang">Privasi</a>
-                <a href="#tentang">Ketentuan Penggunaan</a>
-              </div>
-            </div>
-          </div>
-          <div className="mx-auto max-w-6xl border-t border-border px-5 py-6 text-xs leading-5 text-muted-foreground sm:px-8">
-            RuangPijar bukan layanan diagnosis atau pengganti bantuan
-            profesional. Informasi dan insight yang diberikan ditujukan sebagai
-            sarana refleksi dan dukungan keseharian.
-            <br />
-            <span className="mt-3 inline-block">
-              &copy; 2026 RuangPijar. Dibuat untuk mendukung keseharian yang
-              lebih sadar.
-            </span>
-          </div>
-        </footer>
       </main>
     </>
   );

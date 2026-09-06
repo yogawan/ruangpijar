@@ -1,11 +1,10 @@
 // @/app/Insight/page.tsx
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import AppNav from "@/components/AppNav";
+import NavbarGlobal from "@/components/NavbarGlobal";
 import {
   type Insight,
   insightTypeLabel,
@@ -207,198 +206,191 @@ export default function InsightPage() {
   }
 
   return (
-    <main className="flex min-h-screen justify-center px-6 py-12">
-      <div className="w-full max-w-md">
-        {/* Header */}
-        <div className="mb-8 text-center">
-          <Link href="/" className="inline-block">
-            <Image
-              src="/ruang_pijar_logo.png"
-              alt="RuangPijar"
-              width={478}
-              height={476}
-              className="h-20 w-20 object-contain"
-            />
-          </Link>
+    <>
+      <NavbarGlobal variant="app" />
 
-          <AppNav />
+      <main className="flex flex-1 justify-center px-6 py-12">
+        <div className="w-full max-w-md">
+          {/* Header */}
+          <div className="mb-8 text-center">
+            <h1 className="text-3xl font-bold tracking-tight">Insight</h1>
 
-          <h1 className="mt-8 text-3xl font-bold tracking-tight">Insight</h1>
-
-          <p className="mt-2 text-sm text-muted-foreground">
-            Pola yang mulai terlihat dari check-in kamu.
-          </p>
-        </div>
-
-        <div className="mb-5 flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={() => setFilter("all")}
-            aria-pressed={filter === "all"}
-            className={`${CHIP_CLASS} ${
-              filter === "all"
-                ? "border-primary bg-primary/10 text-primary"
-                : "border-border"
-            }`}
-          >
-            Semua
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setFilter("unread")}
-            aria-pressed={filter === "unread"}
-            className={`${CHIP_CLASS} ${
-              filter === "unread"
-                ? "border-primary bg-primary/10 text-primary"
-                : "border-border"
-            }`}
-          >
-            Belum dibaca
-          </button>
-        </div>
-
-        {error ? (
-          <p role="alert" className={`mb-5 ${ALERT_CLASS}`}>
-            {error}
-          </p>
-        ) : null}
-
-        {generateMessage ? (
-          <p
-            aria-live="polite"
-            className="mb-5 rounded-xl border border-border px-4 py-3 text-sm"
-          >
-            {generateMessage}
-          </p>
-        ) : null}
-
-        {items === null ? (
-          <p className="py-10 text-center text-sm text-muted-foreground">
-            Memuat insight…
-          </p>
-        ) : items.length === 0 ? (
-          <div className="rounded-xl border border-border px-4 py-10 text-center">
-            <p className="text-sm font-medium">
-              {filter === "unread"
-                ? "Semua sudah kamu baca"
-                : "Belum ada insight"}
+            <p className="mt-2 text-sm text-muted-foreground">
+              Pola yang mulai terlihat dari check-in kamu.
             </p>
-
-            <p className={`mt-2 ${HINT_CLASS}`}>
-              {filter === "unread"
-                ? "Tidak ada yang tersisa di sini."
-                : "Insight muncul setelah ada cukup check-in untuk dibaca polanya."}
-            </p>
-
-            {filter === "all" ? (
-              <Link
-                href="/check-in"
-                className="mt-5 inline-block rounded-xl bg-primary px-4 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
-              >
-                Mulai check-in
-              </Link>
-            ) : null}
           </div>
-        ) : (
-          <>
-            <p className={`mb-3 ${HINT_CLASS}`}>
-              {total} insight{filter === "unread" ? " belum dibaca" : ""}.
+
+          <div className="mb-5 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setFilter("all")}
+              aria-pressed={filter === "all"}
+              className={`${CHIP_CLASS} ${
+                filter === "all"
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border"
+              }`}
+            >
+              Semua
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setFilter("unread")}
+              aria-pressed={filter === "unread"}
+              className={`${CHIP_CLASS} ${
+                filter === "unread"
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border"
+              }`}
+            >
+              Belum dibaca
+            </button>
+          </div>
+
+          {error ? (
+            <p role="alert" className={`mb-5 ${ALERT_CLASS}`}>
+              {error}
             </p>
+          ) : null}
 
-            <ul className="space-y-3">
-              {items.map((insight) => (
-                <li
-                  key={insight._id}
-                  className="rounded-xl border border-border px-4 py-4"
+          {generateMessage ? (
+            <p
+              aria-live="polite"
+              className="mb-5 rounded-xl border border-border px-4 py-3 text-sm"
+            >
+              {generateMessage}
+            </p>
+          ) : null}
+
+          {items === null ? (
+            <p className="py-10 text-center text-sm text-muted-foreground">
+              Memuat insight…
+            </p>
+          ) : items.length === 0 ? (
+            <div className="rounded-xl border border-border px-4 py-10 text-center">
+              <p className="text-sm font-medium">
+                {filter === "unread"
+                  ? "Semua sudah kamu baca"
+                  : "Belum ada insight"}
+              </p>
+
+              <p className={`mt-2 ${HINT_CLASS}`}>
+                {filter === "unread"
+                  ? "Tidak ada yang tersisa di sini."
+                  : "Insight muncul setelah ada cukup check-in untuk dibaca polanya."}
+              </p>
+
+              {filter === "all" ? (
+                <Link
+                  href="/check-in"
+                  className="mt-5 inline-block rounded-xl bg-primary px-4 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
                 >
-                  <div className={`flex flex-wrap gap-2 ${HINT_CLASS}`}>
-                    <span>{insightTypeLabel(insight.type)}</span>
+                  Mulai check-in
+                </Link>
+              ) : null}
+            </div>
+          ) : (
+            <>
+              <p className={`mb-3 ${HINT_CLASS}`}>
+                {total} insight{filter === "unread" ? " belum dibaca" : ""}.
+              </p>
 
-                    <span>
-                      · {metricLabel(insight.metric)}
-                      {insight.relatedMetric
-                        ? ` & ${metricLabel(insight.relatedMetric)}`
-                        : ""}
-                    </span>
-
-                    {insight.confidence !== null ? (
-                      <span>
-                        · keyakinan {Math.round(insight.confidence * 100)}%
-                      </span>
-                    ) : null}
-                  </div>
-
-                  <p className="mt-2 text-sm font-medium">{insight.title}</p>
-
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                    {insight.description}
-                  </p>
-
-                  <p className={`mt-3 ${HINT_CLASS}`}>
-                    {PERIOD_FORMAT.format(new Date(insight.periodStart))} –{" "}
-                    {PERIOD_FORMAT.format(new Date(insight.periodEnd))}
-                  </p>
-
-                  {insight.isRead ? (
-                    <p className={`mt-4 ${HINT_CLASS}`}>Sudah dibaca.</p>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => markRead(insight._id)}
-                      disabled={marking === insight._id}
-                      className="mt-4 w-full rounded-xl border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      {marking === insight._id
-                        ? "Menyimpan…"
-                        : "Tandai sudah dibaca"}
-                    </button>
-                  )}
-
-                  {/* A separate link rather than wrapping the card, which
-                      would nest the button above inside an anchor. */}
-                  <Link
-                    href={`/insight/${insight._id}`}
-                    className="mt-3 block text-center text-xs font-medium text-primary hover:underline"
+              <ul className="space-y-3">
+                {items.map((insight) => (
+                  <li
+                    key={insight._id}
+                    className="rounded-xl border border-border px-4 py-4"
                   >
-                    Lihat detail
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </>
-        )}
+                    <div className={`flex flex-wrap gap-2 ${HINT_CLASS}`}>
+                      <span>{insightTypeLabel(insight.type)}</span>
 
-        {page < totalPages ? (
+                      <span>
+                        · {metricLabel(insight.metric)}
+                        {insight.relatedMetric
+                          ? ` & ${metricLabel(insight.relatedMetric)}`
+                          : ""}
+                      </span>
+
+                      {insight.confidence !== null ? (
+                        <span>
+                          · keyakinan {Math.round(insight.confidence * 100)}%
+                        </span>
+                      ) : null}
+                    </div>
+
+                    <p className="mt-2 text-sm font-medium">{insight.title}</p>
+
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                      {insight.description}
+                    </p>
+
+                    <p className={`mt-3 ${HINT_CLASS}`}>
+                      {PERIOD_FORMAT.format(new Date(insight.periodStart))}
+                      {" – "}
+                      {PERIOD_FORMAT.format(new Date(insight.periodEnd))}
+                    </p>
+
+                    {insight.isRead ? (
+                      <p className={`mt-4 ${HINT_CLASS}`}>Sudah dibaca.</p>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => markRead(insight._id)}
+                        disabled={marking === insight._id}
+                        className="mt-4 w-full rounded-xl border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {marking === insight._id
+                          ? "Menyimpan…"
+                          : "Tandai sudah dibaca"}
+                      </button>
+                    )}
+
+                    {/* A separate link rather than wrapping the card, which
+                        would nest the button above inside an anchor. */}
+                    <Link
+                      href={`/insight/${insight._id}`}
+                      className="mt-3 block text-center text-xs font-medium text-primary hover:underline"
+                    >
+                      Lihat detail
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+
+          {page < totalPages ? (
+            <button
+              type="button"
+              onClick={loadMore}
+              disabled={loadingMore}
+              className={`mt-4 ${OUTLINE_BUTTON_CLASS}`}
+            >
+              {loadingMore ? "Memuat…" : "Muat lebih banyak"}
+            </button>
+          ) : null}
+
           <button
             type="button"
-            onClick={loadMore}
-            disabled={loadingMore}
+            onClick={generate}
+            disabled={generating}
             className={`mt-4 ${OUTLINE_BUTTON_CLASS}`}
           >
-            {loadingMore ? "Memuat…" : "Muat lebih banyak"}
+            {generating ? "Mencari pola…" : "Cari pola baru"}
           </button>
-        ) : null}
 
-        <button
-          type="button"
-          onClick={generate}
-          disabled={generating}
-          className={`mt-4 ${OUTLINE_BUTTON_CLASS}`}
-        >
-          {generating ? "Mencari pola…" : "Cari pola baru"}
-        </button>
-
-        <p className="mt-8 text-center text-sm text-muted-foreground">
-          Semua catatanmu ada di{" "}
-          <Link
-            href="/jejak"
-            className="font-medium text-primary hover:underline"
-          >
-            Jejak
-          </Link>
-        </p>
-      </div>
-    </main>
+          <p className="mt-8 text-center text-sm text-muted-foreground">
+            Semua catatanmu ada di{" "}
+            <Link
+              href="/jejak"
+              className="font-medium text-primary hover:underline"
+            >
+              Jejak
+            </Link>
+          </p>
+        </div>
+      </main>
+    </>
   );
 }

@@ -1,11 +1,11 @@
 // @/app/auth/login/page.tsx
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { type FormEvent, useState } from "react";
+import NavbarGlobal from "@/components/NavbarGlobal";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -45,119 +45,113 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-6 py-12">
-      <div className="w-full max-w-md">
-        {/* Header */}
-        <div className="mb-8 text-center">
-          <Link href="/" className="inline-block">
-            <Image
-              src="/ruang_pijar_logo.png"
-              alt="RuangPijar"
-              width={478}
-              height={476}
-              className="h-20 w-20 object-contain"
-            />
-          </Link>
+    <>
+      <NavbarGlobal variant="marketing" />
 
-          <h1 className="mt-8 text-3xl font-bold tracking-tight">
-            Selamat datang kembali
-          </h1>
+      <main className="flex flex-1 items-center justify-center px-6 py-12">
+        <div className="w-full max-w-md">
+          {/* Header */}
+          <div className="mb-8 text-center">
+            <h1 className="text-3xl font-bold tracking-tight">
+              Selamat datang kembali
+            </h1>
 
-          <p className="mt-2 text-sm text-muted-foreground">
-            Masuk untuk melanjutkan perjalananmu.
-          </p>
-        </div>
-
-        {error ? (
-          <p
-            role="alert"
-            className="mb-5 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-700 dark:text-red-300"
-          >
-            {error}
-          </p>
-        ) : null}
-
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div className="space-y-2">
-            <label htmlFor="email" className="text-sm font-medium">
-              Email
-            </label>
-
-            <input
-              id="email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              placeholder="nama@email.com"
-              required
-              className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
-            />
+            <p className="mt-2 text-sm text-muted-foreground">
+              Masuk untuk melanjutkan perjalananmu.
+            </p>
           </div>
 
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <label htmlFor="password" className="text-sm font-medium">
-                Password
+          {error ? (
+            <p
+              role="alert"
+              className="mb-5 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-700 dark:text-red-300"
+            >
+              {error}
+            </p>
+          ) : null}
+
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="space-y-2">
+              <label htmlFor="email" className="text-sm font-medium">
+                Email
               </label>
 
-              <Link
-                href="/forgot-password"
-                className="text-sm text-primary hover:underline"
-              >
-                Lupa password?
-              </Link>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                placeholder="nama@email.com"
+                required
+                className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+              />
             </div>
 
-            <input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              placeholder="Masukkan password"
-              required
-              className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
-            />
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label htmlFor="password" className="text-sm font-medium">
+                  Password
+                </label>
+
+                <Link
+                  href="/forgot-password"
+                  className="text-sm text-primary hover:underline"
+                >
+                  Lupa password?
+                </Link>
+              </div>
+
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autoComplete="current-password"
+                placeholder="Masukkan password"
+                required
+                className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={pending}
+              className="w-full rounded-xl bg-primary px-4 py-3 font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {pending ? "Masuk…" : "Login"}
+            </button>
+          </form>
+
+          {/* Divider */}
+          <div className="my-6 flex items-center gap-4">
+            <div className="h-px flex-1 bg-border" />
+            <span className="text-xs text-muted-foreground">ATAU</span>
+            <div className="h-px flex-1 bg-border" />
           </div>
 
+          {/* Google */}
           <button
-            type="submit"
+            type="button"
             disabled={pending}
-            className="w-full rounded-xl bg-primary px-4 py-3 font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+            onClick={() => signIn("google", { redirectTo: "/onboarding" })}
+            className="flex w-full items-center justify-center gap-3 rounded-xl border border-border px-4 py-3 font-medium transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {pending ? "Masuk…" : "Login"}
+            <span className="text-lg">G</span>
+            Lanjutkan dengan Google
           </button>
-        </form>
 
-        {/* Divider */}
-        <div className="my-6 flex items-center gap-4">
-          <div className="h-px flex-1 bg-border" />
-          <span className="text-xs text-muted-foreground">ATAU</span>
-          <div className="h-px flex-1 bg-border" />
+          {/* Register */}
+          <p className="mt-8 text-center text-sm text-muted-foreground">
+            Belum punya akun?{" "}
+            <Link
+              href="/auth/register"
+              className="font-medium text-primary hover:underline"
+            >
+              Register
+            </Link>
+          </p>
         </div>
-
-        {/* Google */}
-        <button
-          type="button"
-          disabled={pending}
-          onClick={() => signIn("google", { redirectTo: "/onboarding" })}
-          className="flex w-full items-center justify-center gap-3 rounded-xl border border-border px-4 py-3 font-medium transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          <span className="text-lg">G</span>
-          Lanjutkan dengan Google
-        </button>
-
-        {/* Register */}
-        <p className="mt-8 text-center text-sm text-muted-foreground">
-          Belum punya akun?{" "}
-          <Link
-            href="/auth/register"
-            className="font-medium text-primary hover:underline"
-          >
-            Register
-          </Link>
-        </p>
-      </div>
-    </main>
+      </main>
+    </>
   );
 }

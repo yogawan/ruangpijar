@@ -1,12 +1,11 @@
 // @/app/profile/page.tsx
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { type FormEvent, useEffect, useState } from "react";
-import AppNav from "@/components/AppNav";
+import NavbarGlobal from "@/components/NavbarGlobal";
 import {
   CHECK_IN_FREQUENCIES,
   editablePersonalization,
@@ -185,245 +184,243 @@ export default function ProfilePage() {
 
   if (!me || !preferences) {
     return (
-      <main className="flex min-h-screen items-center justify-center px-6 py-12">
-        <div className="w-full max-w-md text-center">
-          {error ? (
-            <p role="alert" className={ALERT_CLASS}>
-              {error}
-            </p>
-          ) : (
-            <p className="text-sm text-muted-foreground">Memuat profilmu…</p>
-          )}
-        </div>
-      </main>
+      <>
+        <NavbarGlobal variant="app" />
+
+        <main className="flex flex-1 items-center justify-center px-6 py-12">
+          <div className="w-full max-w-md text-center">
+            {error ? (
+              <p role="alert" className={ALERT_CLASS}>
+                {error}
+              </p>
+            ) : (
+              <p className="text-sm text-muted-foreground">Memuat profilmu…</p>
+            )}
+          </div>
+        </main>
+      </>
     );
   }
 
   return (
-    <main className="flex min-h-screen justify-center px-6 py-12">
-      <div className="w-full max-w-md">
-        {/* Header */}
-        <div className="mb-8 text-center">
-          <Link href="/" className="inline-block">
-            <Image
-              src="/ruang_pijar_logo.png"
-              alt="RuangPijar"
-              width={478}
-              height={476}
-              className="h-20 w-20 object-contain"
-            />
-          </Link>
+    <>
+      <NavbarGlobal variant="app" />
 
-          <AppNav />
+      <main className="flex flex-1 justify-center px-6 py-12">
+        <div className="w-full max-w-md">
+          {/* Header */}
+          <div className="mb-8 text-center">
+            <h1 className="text-3xl font-bold tracking-tight">Profil</h1>
 
-          <h1 className="mt-8 text-3xl font-bold tracking-tight">Profil</h1>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Bergabung sejak {JOINED_FORMAT.format(new Date(me.createdAt))}.
+            </p>
+          </div>
 
-          <p className="mt-2 text-sm text-muted-foreground">
-            Bergabung sejak {JOINED_FORMAT.format(new Date(me.createdAt))}.
+          {error ? (
+            <p role="alert" className={`mb-5 ${ALERT_CLASS}`}>
+              {error}
+            </p>
+          ) : null}
+
+          {/* Akun — PATCH /api/me */}
+          <form onSubmit={handleAccountSubmit} className={SECTION_CLASS}>
+            <h2 className="text-sm font-medium">Akun</h2>
+
+            <div className="mt-4 space-y-5">
+              <div className="space-y-2">
+                <label htmlFor="name" className="text-sm font-medium">
+                  Nama
+                </label>
+
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  autoComplete="name"
+                  defaultValue={me.name}
+                  maxLength={NAME_MAX}
+                  required
+                  onChange={() => setSaved(null)}
+                  className={FIELD_CLASS}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="email" className="text-sm font-medium">
+                  Email
+                </label>
+
+                {/* Read-only: the API does not accept an email change, since
+                    it is the credentials login identity. */}
+                <input
+                  id="email"
+                  type="email"
+                  value={me.email}
+                  readOnly
+                  disabled
+                  className={`${FIELD_CLASS} cursor-not-allowed opacity-60`}
+                />
+
+                <p className={HINT_CLASS}>
+                  Email tidak bisa diubah untuk saat ini.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="avatarUrl" className="text-sm font-medium">
+                  Foto profil
+                </label>
+
+                <input
+                  id="avatarUrl"
+                  name="avatarUrl"
+                  type="url"
+                  inputMode="url"
+                  placeholder="https://…"
+                  defaultValue={me.avatarUrl ?? ""}
+                  onChange={() => setSaved(null)}
+                  className={FIELD_CLASS}
+                />
+
+                <p className={HINT_CLASS}>Tautan gambar. Boleh dikosongkan.</p>
+              </div>
+
+              <button
+                type="submit"
+                disabled={saving !== null}
+                className={PRIMARY_BUTTON_CLASS}
+              >
+                {saving === "account" ? "Menyimpan…" : "Simpan akun"}
+              </button>
+
+              {saved === "account" ? (
+                <p aria-live="polite" className={`text-center ${HINT_CLASS}`}>
+                  Tersimpan.
+                </p>
+              ) : null}
+            </div>
+          </form>
+
+          {/* Preferensi — PATCH /api/personalization */}
+          <form
+            onSubmit={handlePreferencesSubmit}
+            className={`mt-4 ${SECTION_CLASS}`}
+          >
+            <h2 className="text-sm font-medium">Preferensi</h2>
+
+            <div className="mt-4 space-y-5">
+              <fieldset className="space-y-2">
+                <legend className="text-sm font-medium">
+                  Yang ingin kamu perhatikan
+                </legend>
+
+                <div className="grid grid-cols-2 gap-2 pt-1">
+                  {FOCUS_AREAS.map((area) => (
+                    <label key={area.value} className={CHOICE_CLASS}>
+                      <input
+                        type="checkbox"
+                        name="focusAreas"
+                        value={area.value}
+                        checked={preferences.focusAreas.includes(area.value)}
+                        onChange={() => toggleFocusArea(area.value)}
+                        className="size-4 accent-primary"
+                      />
+                      {area.label}
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+
+              <fieldset className="space-y-2">
+                <legend className="text-sm font-medium">
+                  Frekuensi check-in
+                </legend>
+
+                <div className="space-y-2 pt-1">
+                  {CHECK_IN_FREQUENCIES.map((frequency) => (
+                    <label key={frequency.value} className={CHOICE_CLASS}>
+                      <input
+                        type="radio"
+                        name="checkInFrequency"
+                        value={frequency.value}
+                        checked={
+                          preferences.checkInFrequency === frequency.value
+                        }
+                        onChange={() => {
+                          setSaved(null);
+                          setPreferences({
+                            ...preferences,
+                            checkInFrequency: frequency.value,
+                          });
+                        }}
+                        className="size-4 accent-primary"
+                      />
+                      {frequency.label}
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+
+              <div className="space-y-2">
+                <label
+                  htmlFor="preferredCheckInTime"
+                  className="text-sm font-medium"
+                >
+                  Waktu yang paling pas
+                </label>
+
+                <input
+                  id="preferredCheckInTime"
+                  name="preferredCheckInTime"
+                  type="time"
+                  value={preferences.preferredCheckInTime ?? ""}
+                  onChange={(event) => {
+                    setSaved(null);
+                    setPreferences({
+                      ...preferences,
+                      preferredCheckInTime: event.target.value || null,
+                    });
+                  }}
+                  className={FIELD_CLASS}
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={saving !== null}
+                className={PRIMARY_BUTTON_CLASS}
+              >
+                {saving === "preferences" ? "Menyimpan…" : "Simpan preferensi"}
+              </button>
+
+              {saved === "preferences" ? (
+                <p aria-live="polite" className={`text-center ${HINT_CLASS}`}>
+                  Tersimpan.
+                </p>
+              ) : null}
+            </div>
+          </form>
+
+          <button
+            type="button"
+            onClick={() => signOut({ redirectTo: "/auth/login" })}
+            className={`mt-4 ${OUTLINE_BUTTON_CLASS}`}
+          >
+            Keluar
+          </button>
+
+          <p className="mt-8 text-center text-sm text-muted-foreground">
+            Kembali ke{" "}
+            <Link
+              href="/jejak"
+              className="font-medium text-primary hover:underline"
+            >
+              Jejak
+            </Link>
           </p>
         </div>
-
-        {error ? (
-          <p role="alert" className={`mb-5 ${ALERT_CLASS}`}>
-            {error}
-          </p>
-        ) : null}
-
-        {/* Akun — PATCH /api/me */}
-        <form onSubmit={handleAccountSubmit} className={SECTION_CLASS}>
-          <h2 className="text-sm font-medium">Akun</h2>
-
-          <div className="mt-4 space-y-5">
-            <div className="space-y-2">
-              <label htmlFor="name" className="text-sm font-medium">
-                Nama
-              </label>
-
-              <input
-                id="name"
-                name="name"
-                type="text"
-                autoComplete="name"
-                defaultValue={me.name}
-                maxLength={NAME_MAX}
-                required
-                onChange={() => setSaved(null)}
-                className={FIELD_CLASS}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-medium">
-                Email
-              </label>
-
-              {/* Read-only: the API does not accept an email change, since it
-                  is the credentials login identity. */}
-              <input
-                id="email"
-                type="email"
-                value={me.email}
-                readOnly
-                disabled
-                className={`${FIELD_CLASS} cursor-not-allowed opacity-60`}
-              />
-
-              <p className={HINT_CLASS}>
-                Email tidak bisa diubah untuk saat ini.
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="avatarUrl" className="text-sm font-medium">
-                Foto profil
-              </label>
-
-              <input
-                id="avatarUrl"
-                name="avatarUrl"
-                type="url"
-                inputMode="url"
-                placeholder="https://…"
-                defaultValue={me.avatarUrl ?? ""}
-                onChange={() => setSaved(null)}
-                className={FIELD_CLASS}
-              />
-
-              <p className={HINT_CLASS}>Tautan gambar. Boleh dikosongkan.</p>
-            </div>
-
-            <button
-              type="submit"
-              disabled={saving !== null}
-              className={PRIMARY_BUTTON_CLASS}
-            >
-              {saving === "account" ? "Menyimpan…" : "Simpan akun"}
-            </button>
-
-            {saved === "account" ? (
-              <p aria-live="polite" className={`text-center ${HINT_CLASS}`}>
-                Tersimpan.
-              </p>
-            ) : null}
-          </div>
-        </form>
-
-        {/* Preferensi — PATCH /api/personalization */}
-        <form
-          onSubmit={handlePreferencesSubmit}
-          className={`mt-4 ${SECTION_CLASS}`}
-        >
-          <h2 className="text-sm font-medium">Preferensi</h2>
-
-          <div className="mt-4 space-y-5">
-            <fieldset className="space-y-2">
-              <legend className="text-sm font-medium">
-                Yang ingin kamu perhatikan
-              </legend>
-
-              <div className="grid grid-cols-2 gap-2 pt-1">
-                {FOCUS_AREAS.map((area) => (
-                  <label key={area.value} className={CHOICE_CLASS}>
-                    <input
-                      type="checkbox"
-                      name="focusAreas"
-                      value={area.value}
-                      checked={preferences.focusAreas.includes(area.value)}
-                      onChange={() => toggleFocusArea(area.value)}
-                      className="size-4 accent-primary"
-                    />
-                    {area.label}
-                  </label>
-                ))}
-              </div>
-            </fieldset>
-
-            <fieldset className="space-y-2">
-              <legend className="text-sm font-medium">
-                Frekuensi check-in
-              </legend>
-
-              <div className="space-y-2 pt-1">
-                {CHECK_IN_FREQUENCIES.map((frequency) => (
-                  <label key={frequency.value} className={CHOICE_CLASS}>
-                    <input
-                      type="radio"
-                      name="checkInFrequency"
-                      value={frequency.value}
-                      checked={preferences.checkInFrequency === frequency.value}
-                      onChange={() => {
-                        setSaved(null);
-                        setPreferences({
-                          ...preferences,
-                          checkInFrequency: frequency.value,
-                        });
-                      }}
-                      className="size-4 accent-primary"
-                    />
-                    {frequency.label}
-                  </label>
-                ))}
-              </div>
-            </fieldset>
-
-            <div className="space-y-2">
-              <label
-                htmlFor="preferredCheckInTime"
-                className="text-sm font-medium"
-              >
-                Waktu yang paling pas
-              </label>
-
-              <input
-                id="preferredCheckInTime"
-                name="preferredCheckInTime"
-                type="time"
-                value={preferences.preferredCheckInTime ?? ""}
-                onChange={(event) => {
-                  setSaved(null);
-                  setPreferences({
-                    ...preferences,
-                    preferredCheckInTime: event.target.value || null,
-                  });
-                }}
-                className={FIELD_CLASS}
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={saving !== null}
-              className={PRIMARY_BUTTON_CLASS}
-            >
-              {saving === "preferences" ? "Menyimpan…" : "Simpan preferensi"}
-            </button>
-
-            {saved === "preferences" ? (
-              <p aria-live="polite" className={`text-center ${HINT_CLASS}`}>
-                Tersimpan.
-              </p>
-            ) : null}
-          </div>
-        </form>
-
-        <button
-          type="button"
-          onClick={() => signOut({ redirectTo: "/auth/login" })}
-          className={`mt-4 ${OUTLINE_BUTTON_CLASS}`}
-        >
-          Keluar
-        </button>
-
-        <p className="mt-8 text-center text-sm text-muted-foreground">
-          Kembali ke{" "}
-          <Link
-            href="/jejak"
-            className="font-medium text-primary hover:underline"
-          >
-            Jejak
-          </Link>
-        </p>
-      </div>
-    </main>
+      </main>
+    </>
   );
 }

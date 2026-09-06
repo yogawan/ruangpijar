@@ -1,11 +1,10 @@
 // @/app/ruang/page.tsx
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import AppNav from "@/components/AppNav";
+import NavbarGlobal from "@/components/NavbarGlobal";
 import {
   ACTION_TYPES,
   type Action,
@@ -168,174 +167,167 @@ export default function RuangPage() {
   }
 
   return (
-    <main className="flex min-h-screen justify-center px-6 py-12">
-      <div className="w-full max-w-md">
-        {/* Header */}
-        <div className="mb-8 text-center">
-          <Link href="/" className="inline-block">
-            <Image
-              src="/ruang_pijar_logo.png"
-              alt="RuangPijar"
-              width={478}
-              height={476}
-              className="h-20 w-20 object-contain"
-            />
-          </Link>
+    <>
+      <NavbarGlobal variant="app" />
 
-          <AppNav />
+      <main className="flex flex-1 justify-center px-6 py-12">
+        <div className="w-full max-w-md">
+          {/* Header */}
+          <div className="mb-8 text-center">
+            <h1 className="text-3xl font-bold tracking-tight">Ruang</h1>
 
-          <h1 className="mt-8 text-3xl font-bold tracking-tight">Ruang</h1>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Hal-hal kecil yang bisa kamu coba, sesuai yang sedang kamu
+              rasakan.
+            </p>
+          </div>
 
-          <p className="mt-2 text-sm text-muted-foreground">
-            Hal-hal kecil yang bisa kamu coba, sesuai yang sedang kamu rasakan.
-          </p>
-        </div>
-
-        {/* Filter: no type means the personalised list */}
-        <div className="mb-5 flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={() => setFilter(null)}
-            aria-pressed={filter === null}
-            className={`${CHIP_CLASS} ${
-              filter === null
-                ? "border-primary bg-primary/10 text-primary"
-                : "border-border"
-            }`}
-          >
-            Untuk kamu
-          </button>
-
-          {ACTION_TYPES.map((type) => (
+          {/* Filter: no type means the personalised list */}
+          <div className="mb-5 flex flex-wrap gap-2">
             <button
-              key={type.value}
               type="button"
-              onClick={() => setFilter(type.value)}
-              aria-pressed={filter === type.value}
+              onClick={() => setFilter(null)}
+              aria-pressed={filter === null}
               className={`${CHIP_CLASS} ${
-                filter === type.value
+                filter === null
                   ? "border-primary bg-primary/10 text-primary"
                   : "border-border"
               }`}
             >
-              {type.label}
+              Untuk kamu
             </button>
-          ))}
-        </div>
 
-        {error ? (
-          <p role="alert" className={`mb-5 ${ALERT_CLASS}`}>
-            {error}
-          </p>
-        ) : null}
-
-        {filter === null && basedOnFactors.length > 0 ? (
-          <p className={`mb-4 ${HINT_CLASS}`}>
-            Disarankan dari check-in terakhirmu:{" "}
-            {basedOnFactors.map(factorLabel).join(", ")}.
-          </p>
-        ) : null}
-
-        {actions === null ? (
-          <p className="py-10 text-center text-sm text-muted-foreground">
-            Memuat ruangmu…
-          </p>
-        ) : actions.length === 0 ? (
-          <div className="rounded-xl border border-border px-4 py-10 text-center">
-            <p className="text-sm font-medium">
-              Belum ada yang bisa ditampilkan
-            </p>
-
-            <p className={`mt-2 ${HINT_CLASS}`}>
-              {filter === null
-                ? "Coba check-in dulu supaya kami bisa menyarankan sesuatu."
-                : "Belum ada latihan untuk kategori ini."}
-            </p>
-
-            {filter === null ? (
-              <Link
-                href="/check-in"
-                className="mt-5 inline-block rounded-xl bg-primary px-4 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+            {ACTION_TYPES.map((type) => (
+              <button
+                key={type.value}
+                type="button"
+                onClick={() => setFilter(type.value)}
+                aria-pressed={filter === type.value}
+                className={`${CHIP_CLASS} ${
+                  filter === type.value
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border"
+                }`}
               >
-                Mulai check-in
-              </Link>
-            ) : null}
+                {type.label}
+              </button>
+            ))}
           </div>
-        ) : (
-          <ul className="space-y-3">
-            {actions.map((action) => {
-              const log = logs[action._id];
-              const isBusy = busy === action._id;
 
-              return (
-                <li
-                  key={action._id}
-                  className="rounded-xl border border-border px-4 py-4"
+          {error ? (
+            <p role="alert" className={`mb-5 ${ALERT_CLASS}`}>
+              {error}
+            </p>
+          ) : null}
+
+          {filter === null && basedOnFactors.length > 0 ? (
+            <p className={`mb-4 ${HINT_CLASS}`}>
+              Disarankan dari check-in terakhirmu:{" "}
+              {basedOnFactors.map(factorLabel).join(", ")}.
+            </p>
+          ) : null}
+
+          {actions === null ? (
+            <p className="py-10 text-center text-sm text-muted-foreground">
+              Memuat ruangmu…
+            </p>
+          ) : actions.length === 0 ? (
+            <div className="rounded-xl border border-border px-4 py-10 text-center">
+              <p className="text-sm font-medium">
+                Belum ada yang bisa ditampilkan
+              </p>
+
+              <p className={`mt-2 ${HINT_CLASS}`}>
+                {filter === null
+                  ? "Coba check-in dulu supaya kami bisa menyarankan sesuatu."
+                  : "Belum ada latihan untuk kategori ini."}
+              </p>
+
+              {filter === null ? (
+                <Link
+                  href="/check-in"
+                  className="mt-5 inline-block rounded-xl bg-primary px-4 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
                 >
-                  <div className={`flex flex-wrap gap-2 ${HINT_CLASS}`}>
-                    <span>{actionTypeLabel(action.type)}</span>
+                  Mulai check-in
+                </Link>
+              ) : null}
+            </div>
+          ) : (
+            <ul className="space-y-3">
+              {actions.map((action) => {
+                const log = logs[action._id];
+                const isBusy = busy === action._id;
 
-                    {action.durationMinutes !== null ? (
-                      <span>· {action.durationMinutes} menit</span>
-                    ) : null}
-                  </div>
+                return (
+                  <li
+                    key={action._id}
+                    className="rounded-xl border border-border px-4 py-4"
+                  >
+                    <div className={`flex flex-wrap gap-2 ${HINT_CLASS}`}>
+                      <span>{actionTypeLabel(action.type)}</span>
 
-                  <p className="mt-2 text-sm font-medium">{action.title}</p>
-
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                    {action.description}
-                  </p>
-
-                  {!log ? (
-                    <button
-                      type="button"
-                      onClick={() => startAction(action._id)}
-                      disabled={isBusy}
-                      className="mt-4 w-full rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      {isBusy ? "Memulai…" : "Mulai"}
-                    </button>
-                  ) : log.status === "STARTED" ? (
-                    <div className="mt-4 flex gap-3">
-                      <button
-                        type="button"
-                        onClick={() => closeAction(action._id, "SKIPPED")}
-                        disabled={isBusy}
-                        className={SMALL_BUTTON_CLASS}
-                      >
-                        Lewati
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => closeAction(action._id, "COMPLETED")}
-                        disabled={isBusy}
-                        className="flex-1 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
-                      >
-                        {isBusy ? "Menyimpan…" : "Selesai"}
-                      </button>
+                      {action.durationMinutes !== null ? (
+                        <span>· {action.durationMinutes} menit</span>
+                      ) : null}
                     </div>
-                  ) : (
-                    <p className={`mt-4 ${HINT_CLASS}`}>
-                      {STATUS_NOTE[log.status]}
-                    </p>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-        )}
 
-        <p className="mt-8 text-center text-sm text-muted-foreground">
-          Yang sudah kamu lakukan tercatat di{" "}
-          <Link
-            href="/jejak"
-            className="font-medium text-primary hover:underline"
-          >
-            Jejak
-          </Link>
-        </p>
-      </div>
-    </main>
+                    <p className="mt-2 text-sm font-medium">{action.title}</p>
+
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                      {action.description}
+                    </p>
+
+                    {!log ? (
+                      <button
+                        type="button"
+                        onClick={() => startAction(action._id)}
+                        disabled={isBusy}
+                        className="mt-4 w-full rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {isBusy ? "Memulai…" : "Mulai"}
+                      </button>
+                    ) : log.status === "STARTED" ? (
+                      <div className="mt-4 flex gap-3">
+                        <button
+                          type="button"
+                          onClick={() => closeAction(action._id, "SKIPPED")}
+                          disabled={isBusy}
+                          className={SMALL_BUTTON_CLASS}
+                        >
+                          Lewati
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => closeAction(action._id, "COMPLETED")}
+                          disabled={isBusy}
+                          className="flex-1 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          {isBusy ? "Menyimpan…" : "Selesai"}
+                        </button>
+                      </div>
+                    ) : (
+                      <p className={`mt-4 ${HINT_CLASS}`}>
+                        {STATUS_NOTE[log.status]}
+                      </p>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+
+          <p className="mt-8 text-center text-sm text-muted-foreground">
+            Yang sudah kamu lakukan tercatat di{" "}
+            <Link
+              href="/jejak"
+              className="font-medium text-primary hover:underline"
+            >
+              Jejak
+            </Link>
+          </p>
+        </div>
+      </main>
+    </>
   );
 }
