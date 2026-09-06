@@ -3,15 +3,13 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import CheckInCalendar from "@/components/CheckInCalendar";
+import CheckInDayModal from "@/components/CheckInDayModal";
 import NavbarGlobal from "@/components/NavbarGlobal";
 import { actionTypeLabel } from "@/lib/action-labels";
-import {
-  type CheckIn,
-  factorLabel,
-  moodFor,
-  statsFor,
-} from "@/lib/check-in-labels";
+import { dayKey, monthRange, startOfMonth } from "@/lib/calendar";
+import type { CheckIn } from "@/lib/check-in-labels";
 import { type Insight, insightTypeLabel } from "@/lib/insight-labels";
 
 type ActionLogEntry = {
@@ -28,9 +26,8 @@ type ActionLogEntry = {
   } | null;
 };
 
-// GET /api/jejak merges three collections into one chronological feed.
+// The calendar above owns check-ins, so this feed asks for the other two.
 type JejakEntry =
-  | { type: "CHECK_IN"; id: string; occurredAt: string; data: CheckIn }
   | { type: "ACTION_LOG"; id: string; occurredAt: string; data: ActionLogEntry }
   | { type: "INSIGHT"; id: string; occurredAt: string; data: Insight };
 
@@ -40,6 +37,17 @@ type JejakResponse = {
   page: number;
   limit: number;
 };
+
+type CheckInPage = {
+  items: CheckIn[];
+  totalPages: number;
+};
+
+const JEJAK_URL = "/api/jejak?types=ACTION_LOG,INSIGHT";
+
+// A month of check-ins fits well inside the API's 100 cap, but the response
+// is still paged through rather than assumed to be complete.
+const CHECK_IN_PAGE_SIZE = 100;
 
 const DATE_FORMAT = new Intl.DateTimeFormat("id-ID", {
   weekday: "long",
@@ -54,6 +62,7 @@ const TIME_FORMAT = new Intl.DateTimeFormat("id-ID", {
 });
 
 const LOAD_ERROR = "Riwayatmu belum bisa dimuat. Coba muat ulang halaman.";
+const CALENDAR_ERROR = "Kalendermu belum bisa dimuat. Coba muat ulang halaman.";
 const NETWORK_ERROR = "Tidak bisa terhubung ke server. Periksa koneksimu.";
 
 const ALERT_CLASS =
@@ -65,7 +74,6 @@ const CARD_CLASS = "rounded-xl border border-border px-4 py-4";
 const LINK_CARD_CLASS = `block ${CARD_CLASS} transition-colors hover:border-primary/40`;
 
 const ENTRY_LABEL: Record<JejakEntry["type"], string> = {
-  CHECK_IN: "Check-in",
   ACTION_LOG: "Latihan",
   INSIGHT: "Insight",
 };
@@ -75,6 +83,10 @@ const ACTION_STATUS_LABEL: Record<ActionLogEntry["status"], string> = {
   COMPLETED: "Selesai",
   SKIPPED: "Dilewati",
 };
+
+function isAbort(cause: unknown) {
+  return cause instanceof Error && cause.name === "AbortError";
+}
 
 function EntryHeader({ entry, extra }: { entry: JejakEntry; extra?: string }) {
   const occurredAt = new Date(entry.occurredAt);
@@ -92,8 +104,16 @@ function EntryHeader({ entry, extra }: { entry: JejakEntry; extra?: string }) {
 
 export default function JejakPage() {
   const router = useRouter();
-  // null until the first page resolves, which is what tells loading apart
-  // from a genuinely empty history.
+
+  // --- Calendar -----------------------------------------------------------
+  const [month, setMonth] = useState(() => startOfMonth(new Date()));
+  // null while the month is in flight, which is what separates "loading"
+  // from "this month is genuinely empty".
+  const [checkIns, setCheckIns] = useState<CheckIn[] | null>(null);
+  const [calendarError, setCalendarError] = useState<string | null>(null);
+  const [selectedDay, setSelectedDay] = useState<string | null>(null);
+
+  // --- Latihan & insight feed ---------------------------------------------
   const [items, setItems] = useState<JejakEntry[] | null>(null);
   const [page, setPage] = useState(1);
   // The endpoint reports no total, so "there may be more" is inferred from a
@@ -106,8 +126,63 @@ export default function JejakPage() {
     const controller = new AbortController();
 
     async function load() {
+      setCheckIns(null);
+      setCalendarError(null);
+
+      const { from, to } = monthRange(month);
+      const collected: CheckIn[] = [];
+
       try {
-        const response = await fetch("/api/jejak?page=1", {
+        let current = 1;
+        let totalPages = 1;
+
+        while (current <= totalPages) {
+          const response = await fetch(
+            `/api/check-ins?from=${encodeURIComponent(
+              from,
+            )}&to=${encodeURIComponent(
+              to,
+            )}&page=${current}&limit=${CHECK_IN_PAGE_SIZE}`,
+            { signal: controller.signal },
+          );
+
+          if (response.status === 401) {
+            router.replace("/auth/login");
+            return;
+          }
+
+          if (!response.ok) {
+            setCalendarError(CALENDAR_ERROR);
+            return;
+          }
+
+          const data = (await response.json()) as CheckInPage;
+
+          collected.push(...data.items);
+          totalPages = data.totalPages;
+          current += 1;
+        }
+
+        setCheckIns(collected);
+      } catch (cause) {
+        // Switching months aborts the previous month's request; that is not
+        // an error worth showing.
+        if (isAbort(cause)) return;
+        setCalendarError(NETWORK_ERROR);
+      }
+    }
+
+    load();
+
+    return () => controller.abort();
+  }, [month, router]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function load() {
+      try {
+        const response = await fetch(`${JEJAK_URL}&page=1`, {
           signal: controller.signal,
         });
 
@@ -127,7 +202,7 @@ export default function JejakPage() {
         setPage(data.page);
         setHasMore(data.items.length === data.limit);
       } catch (cause) {
-        if (cause instanceof Error && cause.name === "AbortError") return;
+        if (isAbort(cause)) return;
         setError(NETWORK_ERROR);
       }
     }
@@ -142,7 +217,7 @@ export default function JejakPage() {
     setLoadingMore(true);
 
     try {
-      const response = await fetch(`/api/jejak?page=${page + 1}`);
+      const response = await fetch(`${JEJAK_URL}&page=${page + 1}`);
 
       if (response.status === 401) {
         router.replace("/auth/login");
@@ -165,187 +240,180 @@ export default function JejakPage() {
     }
   }
 
-  if (items === null) {
-    return (
-      <>
-        <NavbarGlobal variant="app" />
+  const checkInsByDay = useMemo(() => {
+    const map = new Map<string, CheckIn[]>();
 
-        <main className="flex flex-1 items-center justify-center px-6 py-12">
-          <div className="w-full max-w-md text-center">
-            {error ? (
-              <p role="alert" className={ALERT_CLASS}>
-                {error}
-              </p>
-            ) : (
-              <p className="text-sm text-muted-foreground">Memuat jejakmu…</p>
-            )}
-          </div>
-        </main>
-      </>
-    );
-  }
+    for (const checkIn of checkIns ?? []) {
+      const key = dayKey(new Date(checkIn.checkedInAt));
+      const existing = map.get(key);
+
+      if (existing) existing.push(checkIn);
+      else map.set(key, [checkIn]);
+    }
+
+    // The API sorts newest first; within a single day, reading top-to-bottom
+    // in the modal is more natural chronologically.
+    for (const entries of map.values()) {
+      entries.sort(
+        (a, b) =>
+          new Date(a.checkedInAt).getTime() - new Date(b.checkedInAt).getTime(),
+      );
+    }
+
+    return map;
+  }, [checkIns]);
+
+  const selectedCheckIns = selectedDay
+    ? (checkInsByDay.get(selectedDay) ?? [])
+    : [];
 
   return (
     <>
       <NavbarGlobal variant="app" />
 
       <main className="flex flex-1 justify-center px-6 py-12">
-        <div className="w-full max-w-md">
+        <div className="w-full max-w-2xl">
           {/* Header */}
           <div className="mb-8 text-center">
             <h1 className="text-3xl font-bold tracking-tight">Jejak</h1>
 
             <p className="mt-2 text-sm text-muted-foreground">
-              Check-in, latihan, dan insight kamu dalam satu urutan.
+              Pilih tanggal untuk melihat check-in hari itu.
             </p>
           </div>
 
-          {error ? (
+          {calendarError ? (
             <p role="alert" className={`mb-5 ${ALERT_CLASS}`}>
-              {error}
+              {calendarError}
             </p>
           ) : null}
 
-          {items.length === 0 ? (
-            <div className={`${CARD_CLASS} py-10 text-center`}>
-              <p className="text-sm font-medium">Belum ada jejak</p>
+          <CheckInCalendar
+            month={month}
+            onMonthChange={setMonth}
+            checkInsByDay={checkInsByDay}
+            onSelectDay={setSelectedDay}
+            loading={checkIns === null && calendarError === null}
+          />
 
-              <p className={`mt-2 ${HINT_CLASS}`}>
-                Begitu kamu menulis check-in pertama, jejaknya muncul di sini.
-              </p>
-
+          {checkIns !== null && checkIns.length === 0 ? (
+            <p className={`mt-4 text-center ${HINT_CLASS}`}>
+              Belum ada check-in di bulan ini.{" "}
               <Link
                 href="/check-in"
-                className="mt-5 inline-block rounded-xl bg-primary px-4 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+                className="font-medium text-primary hover:underline"
               >
                 Mulai check-in
               </Link>
-            </div>
-          ) : (
-            <ul className="space-y-3">
-              {items.map((entry) => {
-                if (entry.type === "CHECK_IN") {
-                  const checkIn = entry.data;
-                  const mood = moodFor(checkIn.mood);
+            </p>
+          ) : null}
+
+          {/* Latihan & insight — everything on this page that is not a
+              check-in, still in one chronological list. */}
+          <section aria-labelledby="jejak-lainnya" className="mt-10">
+            <h2 id="jejak-lainnya" className="text-lg font-semibold">
+              Latihan &amp; Insight
+            </h2>
+
+            <p className={`mt-1 mb-4 ${HINT_CLASS}`}>
+              Latihan yang kamu jalani dan pola yang ditemukan, terbaru dulu.
+            </p>
+
+            {error ? (
+              <p role="alert" className={`mb-5 ${ALERT_CLASS}`}>
+                {error}
+              </p>
+            ) : null}
+
+            {items === null ? (
+              <p className="py-10 text-center text-sm text-muted-foreground">
+                Memuat jejakmu…
+              </p>
+            ) : items.length === 0 ? (
+              <div className={`${CARD_CLASS} py-10 text-center`}>
+                <p className="text-sm font-medium">Belum ada latihan</p>
+
+                <p className={`mt-2 ${HINT_CLASS}`}>
+                  Latihan yang kamu jalani dari Ruang akan tercatat di sini.
+                </p>
+
+                <Link
+                  href="/ruang"
+                  className="mt-5 inline-block rounded-xl bg-primary px-4 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+                >
+                  Lihat Ruang
+                </Link>
+              </div>
+            ) : (
+              <ul className="space-y-3">
+                {items.map((entry) => {
+                  if (entry.type === "ACTION_LOG") {
+                    const log = entry.data;
+
+                    return (
+                      <li
+                        key={`${entry.type}-${entry.id}`}
+                        className={CARD_CLASS}
+                      >
+                        <EntryHeader
+                          entry={entry}
+                          extra={ACTION_STATUS_LABEL[log.status]}
+                        />
+
+                        <p className="mt-2 text-sm font-medium">
+                          {log.actionId?.title ?? "Latihan yang sudah dihapus"}
+                        </p>
+
+                        {log.actionId ? (
+                          <p className={`mt-2 ${HINT_CLASS}`}>
+                            {actionTypeLabel(log.actionId.type)}
+                            {log.actionId.durationMinutes !== null
+                              ? ` · ${log.actionId.durationMinutes} menit`
+                              : ""}
+                          </p>
+                        ) : null}
+                      </li>
+                    );
+                  }
+
+                  const insight = entry.data;
 
                   return (
                     <li key={`${entry.type}-${entry.id}`}>
                       <Link
-                        href={`/check-in/${checkIn._id}`}
+                        href={`/insight/${insight._id}`}
                         className={LINK_CARD_CLASS}
                       >
-                        <EntryHeader entry={entry} />
+                        <EntryHeader
+                          entry={entry}
+                          extra={insightTypeLabel(insight.type)}
+                        />
 
-                        <div className="mt-2 flex items-center gap-3">
-                          <span aria-hidden="true" className="text-2xl">
-                            {mood?.emoji ?? "•"}
-                          </span>
+                        <p className="mt-2 text-sm font-medium">
+                          {insight.title}
+                        </p>
 
-                          <p className="text-sm font-medium">
-                            {mood?.label ?? `Mood ${checkIn.mood}`}
-                          </p>
-                        </div>
-
-                        <dl className="mt-4 grid grid-cols-3 gap-3">
-                          {statsFor(checkIn).map((stat) => (
-                            <div key={stat.label}>
-                              <dt className={HINT_CLASS}>{stat.label}</dt>
-                              <dd className="text-sm font-medium">
-                                {stat.value}
-                              </dd>
-                            </div>
-                          ))}
-                        </dl>
-
-                        {checkIn.factors.length > 0 ? (
-                          <ul className="mt-4 flex flex-wrap gap-2">
-                            {checkIn.factors.map((factor) => (
-                              <li
-                                key={factor}
-                                className="rounded-full border border-border px-3 py-1 text-xs"
-                              >
-                                {factorLabel(factor)}
-                              </li>
-                            ))}
-                          </ul>
-                        ) : null}
-
-                        {checkIn.reflection ? (
-                          <p className="mt-4 whitespace-pre-line text-sm leading-relaxed">
-                            {checkIn.reflection}
-                          </p>
-                        ) : null}
+                        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                          {insight.description}
+                        </p>
                       </Link>
                     </li>
                   );
-                }
+                })}
+              </ul>
+            )}
 
-                if (entry.type === "ACTION_LOG") {
-                  const log = entry.data;
-
-                  return (
-                    <li
-                      key={`${entry.type}-${entry.id}`}
-                      className={CARD_CLASS}
-                    >
-                      <EntryHeader
-                        entry={entry}
-                        extra={ACTION_STATUS_LABEL[log.status]}
-                      />
-
-                      <p className="mt-2 text-sm font-medium">
-                        {log.actionId?.title ?? "Latihan yang sudah dihapus"}
-                      </p>
-
-                      {log.actionId ? (
-                        <p className={`mt-2 ${HINT_CLASS}`}>
-                          {actionTypeLabel(log.actionId.type)}
-                          {log.actionId.durationMinutes !== null
-                            ? ` · ${log.actionId.durationMinutes} menit`
-                            : ""}
-                        </p>
-                      ) : null}
-                    </li>
-                  );
-                }
-
-                const insight = entry.data;
-
-                return (
-                  <li key={`${entry.type}-${entry.id}`}>
-                    <Link
-                      href={`/insight/${insight._id}`}
-                      className={LINK_CARD_CLASS}
-                    >
-                      <EntryHeader
-                        entry={entry}
-                        extra={insightTypeLabel(insight.type)}
-                      />
-
-                      <p className="mt-2 text-sm font-medium">
-                        {insight.title}
-                      </p>
-
-                      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                        {insight.description}
-                      </p>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-
-          {hasMore ? (
-            <button
-              type="button"
-              onClick={loadMore}
-              disabled={loadingMore}
-              className="mt-4 w-full rounded-xl border border-border px-4 py-3 font-medium transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {loadingMore ? "Memuat…" : "Muat lebih banyak"}
-            </button>
-          ) : null}
+            {hasMore ? (
+              <button
+                type="button"
+                onClick={loadMore}
+                disabled={loadingMore}
+                className="mt-4 w-full rounded-xl border border-border px-4 py-3 font-medium transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {loadingMore ? "Memuat…" : "Muat lebih banyak"}
+              </button>
+            ) : null}
+          </section>
 
           <p className="mt-8 text-center text-sm text-muted-foreground">
             Ingin menulis lagi?{" "}
@@ -358,6 +426,12 @@ export default function JejakPage() {
           </p>
         </div>
       </main>
+
+      <CheckInDayModal
+        day={selectedDay ? new Date(`${selectedDay}T00:00:00`) : null}
+        checkIns={selectedCheckIns}
+        onClose={() => setSelectedDay(null)}
+      />
     </>
   );
 }
