@@ -4,12 +4,27 @@
 
 // Emoji and labels follow the check-in component spec in the README; the
 // values are the 1-5 mood scale the model validates.
+//
+// `image` is the illustrated face used by the check-in picker, where the mood
+// is the whole question and deserves the room. The emoji stays for the places
+// a mood is only a detail in a denser layout — a calendar cell, a card in a
+// list — where an illustration would be unreadable at that size.
+//
+// These point at `public/moods/*.png`, cut out from the source renders in
+// `public/*.jpeg`. The originals are drawn on an opaque cream backdrop, which
+// showed as a pale square once a card tints on select; the cut-outs are
+// transparent and scaled so all five faces read at the same size in a row.
 export const MOODS = [
-  { value: 1, emoji: "😣", label: "Berat" },
-  { value: 2, emoji: "😞", label: "Rendah" },
-  { value: 3, emoji: "😐", label: "Biasa" },
-  { value: 4, emoji: "🙂", label: "Baik" },
-  { value: 5, emoji: "😄", label: "Sangat baik" },
+  { value: 1, emoji: "😣", label: "Berat", image: "/moods/berat.png" },
+  { value: 2, emoji: "😞", label: "Rendah", image: "/moods/rendah.png" },
+  { value: 3, emoji: "😐", label: "Biasa", image: "/moods/biasa.png" },
+  { value: 4, emoji: "🙂", label: "Baik", image: "/moods/baik.png" },
+  {
+    value: 5,
+    emoji: "😄",
+    label: "Sangat baik",
+    image: "/moods/sangat-baik.png",
+  },
 ] as const;
 
 export const FACTORS = [

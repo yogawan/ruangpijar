@@ -3,6 +3,7 @@
 // same field set, to POST /api/check-ins and PATCH /api/check-ins/{id}.
 "use client";
 
+import Image from "next/image";
 import { type FormEvent, useState } from "react";
 import { FACTORS, MOODS } from "@/lib/check-in-labels";
 
@@ -180,9 +181,19 @@ export function CheckInForm({
                   required
                   className="sr-only"
                 />
-                <span aria-hidden="true" className="text-2xl">
-                  {mood.emoji}
-                </span>
+                {/* alt is empty on purpose: the label below already names
+                    the mood, so describing the face again would have a
+                    screen reader read every option twice. */}
+                <Image
+                  src={mood.image}
+                  alt=""
+                  width={128}
+                  height={128}
+                  // Small, and all five are above the fold on the opening
+                  // step, so they are worth having ready before it paints.
+                  priority
+                  className="h-12 w-12 object-contain"
+                />
                 <span className="text-[11px] leading-tight">{mood.label}</span>
               </label>
             ))}
