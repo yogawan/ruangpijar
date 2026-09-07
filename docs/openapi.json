@@ -48,6 +48,10 @@
     {
       "name": "Personalization",
       "description": "Per-user app preferences and onboarding state."
+    },
+    {
+      "name": "Cron",
+      "description": "Scheduled maintenance endpoints, hit by an external scheduler rather than a signed-in user."
     }
   ],
   "paths": {
@@ -1246,6 +1250,45 @@
           }
         }
       }
+    },
+    "/api/cron/streak-check": {
+      "get": {
+        "tags": ["Cron"],
+        "summary": "Sweep check-in streaks for reminders and resets",
+        "description": "Meant to be hit once a day by an external scheduler (Vercel Cron, per vercel.json). For every user with an active streak: sends a reminder email 1 and 2 days after their last check-in, and resets the streak to 0 (with a final email) once 3 days have passed without one.",
+        "operationId": "streakCheckCron",
+        "security": [{ "cronSecretAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Sweep completed (whether or not any emails were sent).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StreakCheckResult"
+                },
+                "example": {
+                  "checked": 42,
+                  "remindersSent": 3,
+                  "streaksReset": 1
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or incorrect bearer token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Unauthorized"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1255,6 +1298,11 @@
         "in": "cookie",
         "name": "authjs.session-token",
         "description": "Auth.js v5 JWT session cookie. Named `authjs.session-token` over HTTP (dev) or `__Secure-authjs.session-token` over HTTPS (production). Set automatically by the browser after signing in via `/api/auth/signin`; not passable as a header."
+      },
+      "cronSecretAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Shared secret from the CRON_SECRET env var. Vercel Cron sends it back automatically as this header when that var is set on the project."
       }
     },
     "responses": {
@@ -1370,6 +1418,25 @@
           "onboardingCompleted": {
             "type": "boolean",
             "default": false
+          },
+          "currentStreak": {
+            "type": "integer",
+            "default": 0,
+            "readOnly": true,
+            "description": "Consecutive days with at least one check-in. Resets to 0 after 3 days without one — see /api/cron/streak-check."
+          },
+          "lastCheckInAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "readOnly": true
+          },
+          "lastReminderSentAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "readOnly": true,
+            "description": "Last time a streak-at-risk reminder email went out; guards against sending twice in one day."
           },
           "createdAt": {
             "type": "string",
@@ -1765,6 +1832,21 @@
           },
           "message": {
             "type": "string"
+          }
+        }
+      },
+      "StreakCheckResult": {
+        "type": "object",
+        "properties": {
+          "checked": {
+            "type": "integer",
+            "description": "Users with an active streak examined this run."
+          },
+          "remindersSent": {
+            "type": "integer"
+          },
+          "streaksReset": {
+            "type": "integer"
           }
         }
       },
