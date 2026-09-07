@@ -3,6 +3,7 @@
 import {
   BookOpen,
   CircleUser,
+  Flame,
   Lightbulb,
   Menu,
   PenLine,
@@ -11,6 +12,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 /* The four steps of the loop the product is built around — Reflect, Record,
    Understand, Act — plus the account. Kept in that order so the nav mirrors
@@ -49,6 +51,22 @@ type NavbarGlobalProps = {
  */
 export default function NavbarGlobal({ variant }: NavbarGlobalProps) {
   const pathname = usePathname();
+  const [streak, setStreak] = useState<number | null>(null);
+
+  // Only the signed-in shell has a streak to show; fetched here rather than
+  // passed down since every "app" page already renders this bar on its own.
+  useEffect(() => {
+    if (variant !== "app") return;
+
+    const controller = new AbortController();
+
+    fetch("/api/me", { signal: controller.signal })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => setStreak(data?.currentStreak ?? null))
+      .catch(() => {});
+
+    return () => controller.abort();
+  }, [variant]);
 
   return (
     <header
@@ -61,15 +79,27 @@ export default function NavbarGlobal({ variant }: NavbarGlobalProps) {
           variant === "marketing" ? "Navigasi utama" : "Navigasi aplikasi"
         }
       >
-        <Link href="/" className="font-display text-2xl text-brand">
-          <Image
-            src="/ruang_pijar_logo.png"
-            alt="RuangPijar"
-            width={478}
-            height={476}
-            className="h-11 w-11 object-contain"
-          />
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link href="/" className="font-display text-2xl text-brand">
+            <Image
+              src="/ruang_pijar_logo.png"
+              alt="RuangPijar"
+              width={478}
+              height={476}
+              className="h-11 w-11 object-contain"
+            />
+          </Link>
+
+          {variant === "app" && streak !== null && streak > 0 ? (
+            <span
+              title={`${streak} hari berturut-turut check-in`}
+              className="inline-flex items-center gap-1 rounded-full bg-surface-muted px-2.5 py-1 text-xs font-semibold text-foreground"
+            >
+              <Flame className="h-3.5 w-3.5 text-brand" aria-hidden="true" />
+              {streak}
+            </span>
+          ) : null}
+        </div>
 
         {variant === "marketing" ? (
           <div className="hidden items-center gap-7 text-sm text-muted-foreground md:flex">
