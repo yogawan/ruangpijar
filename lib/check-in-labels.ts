@@ -5,15 +5,19 @@
 // Emoji and labels follow the check-in component spec in the README; the
 // values are the 1-5 mood scale the model validates.
 //
-// `image` is the illustrated face used by the check-in picker, where the mood
-// is the whole question and deserves the room. The emoji stays for the places
-// a mood is only a detail in a denser layout — a calendar cell, a card in a
-// list — where an illustration would be unreadable at that size.
+// `image` is the illustrated face, now used everywhere a mood is shown to the
+// user: the check-in picker, the calendar cell and the day modal on /jejak.
+// `emoji` is kept as the compact written form for anywhere a mood has to sit
+// inside running text or an aria-label.
 //
 // These point at `public/moods/*.png`, cut out from the source renders in
 // `public/*.jpeg`. The originals are drawn on an opaque cream backdrop, which
 // showed as a pale square once a card tints on select; the cut-outs are
 // transparent and scaled so all five faces read at the same size in a row.
+//
+// The faces are plum on transparency, so they need a light surface behind
+// them — see the disc the calendar cell puts under one, since that cell is
+// itself filled with almost exactly the same plum.
 export const MOODS = [
   { value: 1, emoji: "😣", label: "Berat", image: "/moods/berat.png" },
   { value: 2, emoji: "😞", label: "Rendah", image: "/moods/rendah.png" },

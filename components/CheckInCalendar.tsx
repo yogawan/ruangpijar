@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import Image from "next/image";
 import {
   addMonths,
   buildMonthGrid,
@@ -141,11 +142,30 @@ export default function CheckInCalendar({
                   {date.getDate()}
                 </span>
 
-                <span aria-hidden="true" className="text-lg leading-none">
-                  {mood?.emoji ?? "•"}
-                </span>
+                {/* The illustrated faces are plum on transparent, within a
+                    hair of this cell's own fill — dropped straight on they
+                    vanish. The light disc restores the contrast they were
+                    drawn for without giving up the filled cell. */}
+                {mood ? (
+                  <span
+                    aria-hidden="true"
+                    className="flex h-11 w-11 items-center justify-center rounded-full bg-background"
+                  >
+                    <Image
+                      src={mood.image}
+                      alt=""
+                      width={128}
+                      height={128}
+                      className="h-10 w-10 object-contain"
+                    />
+                  </span>
+                ) : (
+                  <span aria-hidden="true" className="text-lg leading-none">
+                    •
+                  </span>
+                )}
 
-                {/* More than one check-in that day: the emoji shows the
+                {/* More than one check-in that day: the face shows the
                     first, this says there is more behind it. */}
                 {entries.length > 1 ? (
                   <span

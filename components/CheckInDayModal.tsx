@@ -1,6 +1,7 @@
 "use client";
 
 import { X } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { DAY_LABEL_FORMAT } from "@/lib/calendar";
@@ -105,9 +106,21 @@ export default function CheckInDayModal({
                   className="rounded-xl border border-border px-4 py-4"
                 >
                   <div className="flex items-center gap-3">
-                    <span aria-hidden="true" className="text-3xl">
-                      {mood?.emoji ?? "•"}
-                    </span>
+                    {/* No disc needed here: the modal sits on the page's own
+                        light background, which is what these were drawn for. */}
+                    {mood ? (
+                      <Image
+                        src={mood.image}
+                        alt=""
+                        width={128}
+                        height={128}
+                        className="h-12 w-12 shrink-0 object-contain"
+                      />
+                    ) : (
+                      <span aria-hidden="true" className="text-3xl">
+                        •
+                      </span>
+                    )}
 
                     <div>
                       <p className="text-sm font-medium">
