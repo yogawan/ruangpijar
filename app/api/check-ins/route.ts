@@ -73,26 +73,35 @@ export async function POST(request: Request) {
 
     // Best-effort: the check-in itself already succeeded above, so a streak
     // bookkeeping failure here shouldn't turn into an error response for it.
+    // `streak` stays null in that case, which the client reads as "nothing
+    // to celebrate" rather than an error.
+    let streak: { current: number; increased: boolean } | null = null;
+
     try {
       const user = await UserModel.findById(userId);
       if (user) {
-        const { currentStreak, lastCheckInAt } = nextStreakState(
+        const previous = user.currentStreak;
+        const next = nextStreakState(
           {
             currentStreak: user.currentStreak,
             lastCheckInAt: user.lastCheckInAt,
           },
           checkIn.checkedInAt,
         );
-        user.currentStreak = currentStreak;
-        user.lastCheckInAt = lastCheckInAt;
+        user.currentStreak = next.currentStreak;
+        user.lastCheckInAt = next.lastCheckInAt;
         user.lastReminderSentAt = null;
         await user.save();
+        streak = {
+          current: next.currentStreak,
+          increased: next.currentStreak > previous,
+        };
       }
     } catch (error) {
       console.error("Failed to update check-in streak", error);
     }
 
-    return Response.json(checkIn, { status: 201 });
+    return Response.json({ ...checkIn.toObject(), streak }, { status: 201 });
   } catch (error) {
     return handleApiError(error);
   }
