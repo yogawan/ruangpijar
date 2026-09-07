@@ -363,11 +363,33 @@
         },
         "responses": {
           "201": {
-            "description": "The created check-in.",
+            "description": "The created check-in, plus the resulting streak.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CheckIn"
+                  "allOf": [
+                    { "$ref": "#/components/schemas/CheckIn" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "streak": {
+                          "type": "object",
+                          "nullable": true,
+                          "description": "Null only if streak bookkeeping failed after the check-in was already saved.",
+                          "properties": {
+                            "current": {
+                              "type": "integer",
+                              "description": "The user's currentStreak after this check-in."
+                            },
+                            "increased": {
+                              "type": "boolean",
+                              "description": "True unless this was a second check-in on the same day. The client shows the streak pop-up only when this is true."
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
                 }
               }
             }
