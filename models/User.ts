@@ -44,6 +44,26 @@ const userSchema = new Schema(
       type: Boolean,
       default: false,
     },
+
+    // Daily check-in streak — maintained by `nextStreakState` (lib/streak.ts)
+    // whenever a check-in is created, and by the /api/cron/streak-check
+    // sweep when a streak lapses after 3 days of silence.
+    currentStreak: {
+      type: Number,
+      default: 0,
+    },
+
+    lastCheckInAt: {
+      type: Date,
+      default: null,
+    },
+
+    // Guards the reminder sweep against emailing the same day twice if it
+    // runs more than once — see /api/cron/streak-check.
+    lastReminderSentAt: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,

@@ -3,7 +3,9 @@ import type { NextRequest } from "next/server";
 import { handleApiError, jsonError, parsePagination } from "@/lib/http";
 import { connectDB } from "@/lib/mongodb";
 import { getCurrentUserId } from "@/lib/session";
+import { nextStreakState } from "@/lib/streak";
 import { CheckInModel } from "@/models/CheckIn";
+import { UserModel } from "@/models/User";
 
 export async function GET(request: NextRequest) {
   const userId = await getCurrentUserId();
@@ -68,6 +70,27 @@ export async function POST(request: Request) {
       reflection: body.reflection,
       checkedInAt: body.checkedInAt,
     });
+
+    // Best-effort: the check-in itself already succeeded above, so a streak
+    // bookkeeping failure here shouldn't turn into an error response for it.
+    try {
+      const user = await UserModel.findById(userId);
+      if (user) {
+        const { currentStreak, lastCheckInAt } = nextStreakState(
+          {
+            currentStreak: user.currentStreak,
+            lastCheckInAt: user.lastCheckInAt,
+          },
+          checkIn.checkedInAt,
+        );
+        user.currentStreak = currentStreak;
+        user.lastCheckInAt = lastCheckInAt;
+        user.lastReminderSentAt = null;
+        await user.save();
+      }
+    } catch (error) {
+      console.error("Failed to update check-in streak", error);
+    }
 
     return Response.json(checkIn, { status: 201 });
   } catch (error) {
