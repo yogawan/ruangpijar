@@ -9,6 +9,7 @@ import {
   type CheckInFormValues,
 } from "@/components/check-in-form";
 import NavbarGlobal from "@/components/NavbarGlobal";
+import StreakPopup from "@/components/StreakPopup";
 
 const ERROR_BY_STATUS: Record<number, string> = {
   400: "Ada isian yang belum sesuai. Coba periksa lagi.",
@@ -17,10 +18,22 @@ const ERROR_BY_STATUS: Record<number, string> = {
 const ALERT_CLASS =
   "mb-5 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-700 dark:text-red-300";
 
+type CheckInResponse = {
+  streak: { current: number; increased: boolean } | null;
+};
+
 export default function CheckInPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  // Non-null only when the streak actually grew, so the pop-up (and the
+  // redirect it defers) is skipped for an ordinary second check-in.
+  const [celebrateStreak, setCelebrateStreak] = useState<number | null>(null);
+
+  function goToJejak() {
+    router.push("/jejak");
+    router.refresh();
+  }
 
   async function handleSubmit(values: CheckInFormValues) {
     setError(null);
@@ -48,8 +61,15 @@ export default function CheckInPage() {
         return;
       }
 
-      router.push("/jejak");
-      router.refresh();
+      const data = (await response.json()) as CheckInResponse;
+
+      if (data.streak?.increased) {
+        setPending(false);
+        setCelebrateStreak(data.streak.current);
+        return;
+      }
+
+      goToJejak();
     } catch {
       setError("Tidak bisa terhubung ke server. Periksa koneksimu.");
       setPending(false);
@@ -97,6 +117,14 @@ export default function CheckInPage() {
           </p>
         </div>
       </main>
+
+      <StreakPopup
+        streak={celebrateStreak}
+        onClose={() => {
+          setCelebrateStreak(null);
+          goToJejak();
+        }}
+      />
     </>
   );
 }
