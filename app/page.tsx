@@ -142,12 +142,12 @@ export default function HomePage() {
           </div>
           <div data-hero-visual className="relative mx-auto w-full max-w-lg">
             <Image
-              src="/hero_image.webp"
-              alt="Ilustrasi refleksi diri"
+              src="/maskot-pijar/Hero.webp"
+              alt="Maskot RuangPijar"
               width={1024}
               height={1024}
               priority
-              className="aspect-square w-full rounded-[28px] object-cover"
+              className="aspect-square w-full rounded-[28px] object-contain"
             />
             {/* Previous CSS check-in illustration, retained as requested.
           <div className="aspect-[4/5] rounded-[28px] border border-border bg-surface p-5 shadow-md">
