@@ -27,7 +27,7 @@ export default function FooterGlobal() {
         <div>
           <Link href="/" className="font-display text-2xl text-brand">
             <Image
-              src="/ruang_pijar_logo.png"
+              src="/ruang_pijar_logo.webp"
               alt="RuangPijar"
               width={478}
               height={476}

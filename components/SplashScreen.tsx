@@ -122,7 +122,7 @@ export default function SplashScreen() {
         <div className="flex flex-col items-center gap-5">
           <div ref={logoRef} style={{ opacity: 0 }}>
             <Image
-              src="/ruang_pijar_logo.png"
+              src="/ruang_pijar_logo.webp"
               alt=""
               width={478}
               height={476}

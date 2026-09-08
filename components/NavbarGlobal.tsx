@@ -82,7 +82,7 @@ export default function NavbarGlobal({ variant }: NavbarGlobalProps) {
         <div className="flex items-center gap-3">
           <Link href="/" className="font-display text-2xl text-brand">
             <Image
-              src="/ruang_pijar_logo.png"
+              src="/ruang_pijar_logo.webp"
               alt="RuangPijar"
               width={478}
               height={476}

@@ -10,8 +10,8 @@
 // `emoji` is kept as the compact written form for anywhere a mood has to sit
 // inside running text or an aria-label.
 //
-// These point at `public/moods/*.png`, cut out from the source renders in
-// `public/*.jpeg`. The originals are drawn on an opaque cream backdrop, which
+// These point at `public/moods/*.webp`, cut out from the source renders in
+// `public/*.webp`. The originals are drawn on an opaque cream backdrop, which
 // showed as a pale square once a card tints on select; the cut-outs are
 // transparent and scaled so all five faces read at the same size in a row.
 //
@@ -19,15 +19,15 @@
 // them — see the disc the calendar cell puts under one, since that cell is
 // itself filled with almost exactly the same plum.
 export const MOODS = [
-  { value: 1, emoji: "😣", label: "Berat", image: "/moods/berat.png" },
-  { value: 2, emoji: "😞", label: "Rendah", image: "/moods/rendah.png" },
-  { value: 3, emoji: "😐", label: "Biasa", image: "/moods/biasa.png" },
-  { value: 4, emoji: "🙂", label: "Baik", image: "/moods/baik.png" },
+  { value: 1, emoji: "😣", label: "Berat", image: "/moods/berat.webp" },
+  { value: 2, emoji: "😞", label: "Rendah", image: "/moods/rendah.webp" },
+  { value: 3, emoji: "😐", label: "Biasa", image: "/moods/biasa.webp" },
+  { value: 4, emoji: "🙂", label: "Baik", image: "/moods/baik.webp" },
   {
     value: 5,
     emoji: "😄",
     label: "Sangat baik",
-    image: "/moods/sangat-baik.png",
+    image: "/moods/sangat-baik.webp",
   },
 ] as const;
 

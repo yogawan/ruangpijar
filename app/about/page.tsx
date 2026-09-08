@@ -18,47 +18,47 @@ const loop = [
     "01",
     "Check-in",
     "Ceritakan kondisi harianmu lewat beberapa pertanyaan sederhana tentang mood, energi, stres, tidur, dan aktivitas.",
-    "/01_Check-in.png",
+    "/01_Check-in.webp",
   ],
   [
     "02",
     "Jejak",
     "Setiap check-in menjadi bagian dari jejak keseharianmu. Seiring waktu, perubahan kecil pun mulai terlihat.",
-    "/02_Jejak.png",
+    "/02_Jejak.webp",
   ],
   [
     "03",
     "Insight",
     "RuangPijar membantu menghubungkan berbagai aspek keseharianmu berdasarkan catatanmu sendiri.",
-    "/03_Insight.png",
+    "/03_Insight.webp",
   ],
   [
     "04",
     "Ruang",
     "Dapatkan rekomendasi langkah kecil yang relevan dengan kondisimu saat ini.",
-    "/04_Ruang.png",
+    "/04_Ruang.webp",
   ],
 ];
 
 const principles = [
-  ["Privat", "Data keseharianmu diakses melalui akunmu.", "/Privat.jpg"],
+  ["Privat", "Data keseharianmu diakses melalui akunmu.", "/Privat.webp"],
   [
     "Transparan",
     "Kamu tahu apa yang dicatat dan digunakan.",
-    "/Transparan.jpg",
+    "/Transparan.webp",
   ],
   [
     "Non-diagnostik",
     "Refleksi, bukan pengganti tenaga profesional.",
-    "/Non-diagnostik.jpg",
+    "/Non-diagnostik.webp",
   ],
 ];
 
 const team = [
-  ["Yogawan A. P. T.", "Frontend & UI/UX", "/Yogawan.png"],
-  ["S. Ridho E.", "Frontend", "/Ridho.png"],
-  ["A. Gading S.", "Backend", "/Gading.png"],
-  ["Latief R.", "Backend", "/Latief.png"],
+  ["Yogawan A. P. T.", "Frontend & UI/UX", "/team/Yogawan.webp"],
+  ["S. Ridho E.", "Frontend", "/team/Ridho.webp"],
+  ["A. Gading S.", "Backend", "/team/Gading.webp"],
+  ["Latief R.", "Backend", "/team/Latief.webp"],
 ];
 
 export default function AboutPage() {
@@ -161,7 +161,7 @@ export default function AboutPage() {
         <section className="mx-auto grid max-w-6xl gap-10 px-5 py-20 sm:px-8 lg:grid-cols-2 lg:items-center lg:py-24">
           <div data-reveal>
             <Image
-              src="/Ruangmu-tetap-milikmu.jpg"
+              src="/Ruangmu-tetap-milikmu.webp"
               alt=""
               width={720}
               height={720}

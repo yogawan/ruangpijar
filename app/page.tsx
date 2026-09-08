@@ -9,17 +9,17 @@ const problemCards = [
   [
     "Akademik",
     "Deadline, tugas, ujian, dan tuntutan untuk terus berkembang.",
-    "/01_Akademik.jpg",
+    "/01_Akademik.webp",
   ],
   [
     "Keseharian",
     "Tidur, energi, rutinitas, dan waktu untuk beristirahat.",
-    "/02_Keseharian.jpg",
+    "/02_Keseharian.webp",
   ],
   [
     "Sosial & Personal",
     "Hubungan, keluarga, pekerjaan, dan hal-hal yang kita simpan sendiri.",
-    "/03_Sosial-Personal.jpg",
+    "/03_Sosial-Personal.webp",
   ],
 ];
 
@@ -29,28 +29,28 @@ const steps = [
     "Check-in",
     "Apa yang kamu rasakan hari ini?",
     "Ceritakan kondisi harianmu melalui beberapa pertanyaan sederhana tentang mood, energi, stres, tidur, dan aktivitas.",
-    "/01_Check-in.png",
+    "/01_Check-in.webp",
   ],
   [
     "02",
     "Jejak",
     "Lihat perjalananmu.",
     "Setiap check-in menjadi bagian dari jejak keseharianmu. Seiring waktu, perubahan kecil pun dapat terlihat.",
-    "/02_Jejak.png",
+    "/02_Jejak.webp",
   ],
   [
     "03",
     "Insight",
     "Temukan pola yang mungkin terlewat.",
     "RuangPijar membantu menghubungkan berbagai aspek keseharianmu berdasarkan catatanmu sendiri.",
-    "/03_Insight.png",
+    "/03_Insight.webp",
   ],
   [
     "04",
     "Ruang",
     "Ambil langkah kecil.",
     "Dapatkan rekomendasi aktivitas sederhana yang relevan dengan kondisimu saat ini.",
-    "/04_Ruang.png",
+    "/04_Ruang.webp",
   ],
 ];
 
@@ -60,28 +60,28 @@ const features = [
     "Berhenti sejenak. Cek keadaanmu.",
     "Catat mood, energi, stres, tidur, beban akademik, kondisi sosial, dan apa yang sedang kamu rasakan.",
     "Mulai Check-in",
-    "/01_Daily-Check-in.png",
+    "/01_Daily-Check-in.webp",
   ],
   [
     "Jejak Keseharian",
     "Lihat apa yang berubah dari waktu ke waktu.",
     "Pantau perjalanan mood, energi, dan stres melalui visualisasi yang sederhana dan mudah dipahami.",
     "Lihat Contoh Jejak",
-    "/02_Jejak-Keseharian.png",
+    "/02_Jejak-Keseharian.webp",
   ],
   [
     "Personal Insight",
     "Oh, ternyata...",
     "Temukan hubungan dan pola dari catatanmu sendiri, seperti ketika beban akademik meningkat dan energimu berubah.",
     "Lihat Contoh Insight",
-    "/03_Personal-Insight.png",
+    "/03_Personal-Insight.webp",
   ],
   [
     "Ruang untuk Bertindak",
     "Tidak harus melakukan semuanya sekaligus.",
     "Temukan langkah kecil untuk hari ini: ambil jeda, atur ulang tugas, bernapas sejenak, atau mencari dukungan.",
     "Lihat pilihan ruang",
-    "/04_Ruang-untuk-Bertindak.png",
+    "/04_Ruang-untuk-Bertindak.webp",
   ],
 ];
 
@@ -142,7 +142,7 @@ export default function HomePage() {
           </div>
           <div data-hero-visual className="relative mx-auto w-full max-w-lg">
             <Image
-              src="/hero_image.png"
+              src="/hero_image.webp"
               alt="Ilustrasi refleksi diri"
               width={1024}
               height={1024}
@@ -429,7 +429,7 @@ export default function HomePage() {
         <section className="mx-auto grid max-w-6xl gap-12 px-5 py-20 sm:px-8 lg:grid-cols-[.9fr_1.1fr] lg:items-center lg:py-28">
           <div data-reveal className="rounded-2xl bg-sage-soft p-8 sm:p-11">
             <Image
-              src="/Ruangmu-tetap-milikmu.jpg"
+              src="/Ruangmu-tetap-milikmu.webp"
               alt=""
               width={160}
               height={160}
@@ -455,7 +455,7 @@ export default function HomePage() {
             <dl className="mt-8 grid gap-5 sm:grid-cols-3">
               <div>
                 <Image
-                  src="/Privat.jpg"
+                  src="/Privat.webp"
                   alt=""
                   width={160}
                   height={160}
@@ -468,7 +468,7 @@ export default function HomePage() {
               </div>
               <div>
                 <Image
-                  src="/Transparan.jpg"
+                  src="/Transparan.webp"
                   alt=""
                   width={160}
                   height={160}
@@ -481,7 +481,7 @@ export default function HomePage() {
               </div>
               <div>
                 <Image
-                  src="/Non-diagnostik.jpg"
+                  src="/Non-diagnostik.webp"
                   alt=""
                   width={160}
                   height={160}
