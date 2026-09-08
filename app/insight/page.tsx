@@ -1,6 +1,7 @@
 // @/app/Insight/page.tsx
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -269,7 +270,19 @@ export default function InsightPage() {
             </p>
           ) : items.length === 0 ? (
             <div className="rounded-xl border border-border px-4 py-10 text-center">
-              <p className="text-sm font-medium">
+              {filter === "all" ? (
+                <Image
+                  src="/maskot-pijar/Insight Unavailable.webp"
+                  alt=""
+                  width={200}
+                  height={200}
+                  className="mx-auto h-28 w-28 object-contain"
+                />
+              ) : null}
+
+              <p
+                className={`text-sm font-medium ${filter === "all" ? "mt-4" : ""}`}
+              >
                 {filter === "unread"
                   ? "Semua sudah kamu baca"
                   : "Belum ada insight"}

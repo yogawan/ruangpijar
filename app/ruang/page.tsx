@@ -1,6 +1,7 @@
 // @/app/ruang/page.tsx
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -233,7 +234,15 @@ export default function RuangPage() {
             </p>
           ) : actions.length === 0 ? (
             <div className="rounded-xl border border-border px-4 py-10 text-center">
-              <p className="text-sm font-medium">
+              <Image
+                src="/maskot-pijar/Empty State.webp"
+                alt=""
+                width={200}
+                height={200}
+                className="mx-auto h-28 w-28 object-contain"
+              />
+
+              <p className="mt-4 text-sm font-medium">
                 Belum ada yang bisa ditampilkan
               </p>
 
