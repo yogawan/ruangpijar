@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useEffect, useState } from "react";
+import LoadingState from "@/components/LoadingState";
 import {
   CHECK_IN_FREQUENCIES,
   editablePersonalization,
@@ -154,7 +155,7 @@ export default function OnboardingPage() {
               {error}
             </p>
           ) : (
-            <p className="text-sm text-muted-foreground">Menyiapkan ruangmu…</p>
+            <LoadingState label="Menyiapkan ruangmu…" />
           )}
         </div>
       </main>
@@ -168,7 +169,7 @@ export default function OnboardingPage() {
         <div className="mb-8 text-center">
           <Link href="/" className="inline-block">
             <Image
-              src="/ruang_pijar_logo.png"
+              src="/ruang_pijar_logo.webp"
               alt="RuangPijar"
               width={478}
               height={476}

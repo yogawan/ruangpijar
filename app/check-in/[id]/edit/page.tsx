@@ -9,6 +9,7 @@ import {
   CheckInForm,
   type CheckInFormValues,
 } from "@/components/check-in-form";
+import LoadingState from "@/components/LoadingState";
 import type { CheckIn } from "@/lib/check-in-labels";
 
 // "missing" covers both a 404 and the 400 a malformed id produces.
@@ -122,7 +123,7 @@ export default function EditCheckInPage() {
   if (status === "loading") {
     return (
       <main className="flex min-h-screen items-center justify-center px-6 py-12">
-        <p className="text-sm text-muted-foreground">Memuat check-in…</p>
+        <LoadingState label="Memuat check-in…" />
       </main>
     );
   }
@@ -163,7 +164,7 @@ export default function EditCheckInPage() {
         <div className="mb-8 text-center">
           <Link href="/" className="inline-block">
             <Image
-              src="/ruang_pijar_logo.png"
+              src="/ruang_pijar_logo.webp"
               alt="RuangPijar"
               width={478}
               height={476}

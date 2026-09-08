@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { type FormEvent, useEffect, useState } from "react";
+import LoadingState from "@/components/LoadingState";
 import NavbarGlobal from "@/components/NavbarGlobal";
 import {
   CHECK_IN_FREQUENCIES,
@@ -194,7 +195,7 @@ export default function ProfilePage() {
                 {error}
               </p>
             ) : (
-              <p className="text-sm text-muted-foreground">Memuat profilmu…</p>
+              <LoadingState label="Memuat profilmu…" />
             )}
           </div>
         </main>

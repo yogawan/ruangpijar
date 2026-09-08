@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import LoadingState from "@/components/LoadingState";
 import {
   type Insight,
   insightTypeLabel,
@@ -137,7 +138,7 @@ export default function InsightDetailPage() {
   if (status === "loading") {
     return (
       <main className="flex min-h-screen items-center justify-center px-6 py-12">
-        <p className="text-sm text-muted-foreground">Memuat insight…</p>
+        <LoadingState label="Memuat insight…" />
       </main>
     );
   }
@@ -178,7 +179,7 @@ export default function InsightDetailPage() {
         <div className="mb-8 text-center">
           <Link href="/" className="inline-block">
             <Image
-              src="/ruang_pijar_logo.png"
+              src="/ruang_pijar_logo.webp"
               alt="RuangPijar"
               width={478}
               height={476}
