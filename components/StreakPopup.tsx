@@ -2,7 +2,7 @@
 
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { Flame } from "lucide-react";
+import Image from "next/image";
 import { useEffect, useRef } from "react";
 
 gsap.registerPlugin(useGSAP);
@@ -102,7 +102,13 @@ export default function StreakPopup({ streak, onClose }: StreakPopupProps) {
       {streak !== null ? (
         <div className="flex flex-col items-center gap-4 px-6 py-10 text-center">
           <div ref={flameRef} style={{ opacity: 0 }}>
-            <Flame className="h-20 w-20 text-brand" aria-hidden="true" />
+            <Image
+              src="/maskot-pijar/Streak.webp"
+              alt=""
+              width={200}
+              height={200}
+              className="h-40 w-40 object-contain"
+            />
           </div>
 
           <div ref={detailsRef} style={{ opacity: 0 }}>
