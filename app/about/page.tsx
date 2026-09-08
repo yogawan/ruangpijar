@@ -56,9 +56,9 @@ const principles = [
 
 const team = [
   ["Yogawan A. P. T.", "Frontend & UI/UX", "/Yogawan.png"],
-  ["Ridho E.", "Frontend", "/Ridho.png"],
+  ["S. Ridho E.", "Frontend", "/Ridho.png"],
   ["A. Gading S.", "Backend", "/Gading.png"],
-  ["Latief R. S.", "Backend", "/Latief.png"],
+  ["Latief R.", "Backend", "/Latief.png"],
 ];
 
 export default function AboutPage() {
