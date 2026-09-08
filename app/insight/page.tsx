@@ -210,18 +210,20 @@ export default function InsightPage() {
     <>
       <NavbarGlobal variant="app" />
 
-      <main className="flex flex-1 justify-center px-6 py-12">
-        <div className="w-full max-w-md">
+      <main className="flex flex-1 justify-center px-6 py-12 sm:px-8 lg:py-16">
+        <div className="w-full max-w-5xl">
           {/* Header */}
-          <div className="mb-8 text-center">
-            <h1 className="text-3xl font-bold tracking-tight">Insight</h1>
+          <div className="mx-auto mb-8 max-w-2xl text-center">
+            <h1 className="text-3xl font-bold tracking-tight lg:text-4xl">
+              Insight
+            </h1>
 
             <p className="mt-2 text-sm text-muted-foreground">
               Pola yang mulai terlihat dari check-in kamu.
             </p>
           </div>
 
-          <div className="mb-5 flex flex-wrap gap-2">
+          <div className="mb-5 flex flex-wrap justify-center gap-2">
             <button
               type="button"
               onClick={() => setFilter("all")}
@@ -250,7 +252,7 @@ export default function InsightPage() {
           </div>
 
           {error ? (
-            <p role="alert" className={`mb-5 ${ALERT_CLASS}`}>
+            <p role="alert" className={`mx-auto mb-5 max-w-2xl ${ALERT_CLASS}`}>
               {error}
             </p>
           ) : null}
@@ -258,7 +260,7 @@ export default function InsightPage() {
           {generateMessage ? (
             <p
               aria-live="polite"
-              className="mb-5 rounded-xl border border-border px-4 py-3 text-sm"
+              className="mx-auto mb-5 max-w-2xl rounded-xl border border-border px-4 py-3 text-center text-sm"
             >
               {generateMessage}
             </p>
@@ -269,14 +271,14 @@ export default function InsightPage() {
               Memuat insight…
             </p>
           ) : items.length === 0 ? (
-            <div className="rounded-xl border border-border px-4 py-10 text-center">
+            <div className="mx-auto max-w-md rounded-xl border border-border px-4 py-10 text-center">
               {filter === "all" ? (
                 <Image
                   src="/maskot-pijar/Insight Unavailable.webp"
                   alt=""
-                  width={200}
-                  height={200}
-                  className="mx-auto h-28 w-28 object-contain"
+                  width={280}
+                  height={280}
+                  className="mx-auto h-40 w-40 object-contain"
                 />
               ) : null}
 
@@ -309,7 +311,7 @@ export default function InsightPage() {
                 {total} insight{filter === "unread" ? " belum dibaca" : ""}.
               </p>
 
-              <ul className="space-y-3">
+              <ul className="grid gap-4 md:grid-cols-2">
                 {items.map((insight) => (
                   <li
                     key={insight._id}
@@ -373,35 +375,37 @@ export default function InsightPage() {
             </>
           )}
 
-          {page < totalPages ? (
+          <div className="mx-auto max-w-md">
+            {page < totalPages ? (
+              <button
+                type="button"
+                onClick={loadMore}
+                disabled={loadingMore}
+                className={`mt-4 ${OUTLINE_BUTTON_CLASS}`}
+              >
+                {loadingMore ? "Memuat…" : "Muat lebih banyak"}
+              </button>
+            ) : null}
+
             <button
               type="button"
-              onClick={loadMore}
-              disabled={loadingMore}
+              onClick={generate}
+              disabled={generating}
               className={`mt-4 ${OUTLINE_BUTTON_CLASS}`}
             >
-              {loadingMore ? "Memuat…" : "Muat lebih banyak"}
+              {generating ? "Mencari pola…" : "Cari pola baru"}
             </button>
-          ) : null}
 
-          <button
-            type="button"
-            onClick={generate}
-            disabled={generating}
-            className={`mt-4 ${OUTLINE_BUTTON_CLASS}`}
-          >
-            {generating ? "Mencari pola…" : "Cari pola baru"}
-          </button>
-
-          <p className="mt-8 text-center text-sm text-muted-foreground">
-            Semua catatanmu ada di{" "}
-            <Link
-              href="/jejak"
-              className="font-medium text-primary hover:underline"
-            >
-              Jejak
-            </Link>
-          </p>
+            <p className="mt-8 text-center text-sm text-muted-foreground">
+              Semua catatanmu ada di{" "}
+              <Link
+                href="/jejak"
+                className="font-medium text-primary hover:underline"
+              >
+                Jejak
+              </Link>
+            </p>
+          </div>
         </div>
       </main>
     </>

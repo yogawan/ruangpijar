@@ -171,11 +171,13 @@ export default function RuangPage() {
     <>
       <NavbarGlobal variant="app" />
 
-      <main className="flex flex-1 justify-center px-6 py-12">
-        <div className="w-full max-w-md">
+      <main className="flex flex-1 justify-center px-6 py-12 sm:px-8 lg:py-16">
+        <div className="w-full max-w-5xl">
           {/* Header */}
-          <div className="mb-8 text-center">
-            <h1 className="text-3xl font-bold tracking-tight">Ruang</h1>
+          <div className="mx-auto mb-8 max-w-2xl text-center">
+            <h1 className="text-3xl font-bold tracking-tight lg:text-4xl">
+              Ruang
+            </h1>
 
             <p className="mt-2 text-sm text-muted-foreground">
               Hal-hal kecil yang bisa kamu coba, sesuai yang sedang kamu
@@ -184,7 +186,7 @@ export default function RuangPage() {
           </div>
 
           {/* Filter: no type means the personalised list */}
-          <div className="mb-5 flex flex-wrap gap-2">
+          <div className="mb-5 flex flex-wrap justify-center gap-2">
             <button
               type="button"
               onClick={() => setFilter(null)}
@@ -216,13 +218,13 @@ export default function RuangPage() {
           </div>
 
           {error ? (
-            <p role="alert" className={`mb-5 ${ALERT_CLASS}`}>
+            <p role="alert" className={`mx-auto mb-5 max-w-2xl ${ALERT_CLASS}`}>
               {error}
             </p>
           ) : null}
 
           {filter === null && basedOnFactors.length > 0 ? (
-            <p className={`mb-4 ${HINT_CLASS}`}>
+            <p className={`mb-4 text-center ${HINT_CLASS}`}>
               Disarankan dari check-in terakhirmu:{" "}
               {basedOnFactors.map(factorLabel).join(", ")}.
             </p>
@@ -233,13 +235,13 @@ export default function RuangPage() {
               Memuat ruangmu…
             </p>
           ) : actions.length === 0 ? (
-            <div className="rounded-xl border border-border px-4 py-10 text-center">
+            <div className="mx-auto max-w-md rounded-xl border border-border px-4 py-10 text-center">
               <Image
                 src="/maskot-pijar/Empty State.webp"
                 alt=""
-                width={200}
-                height={200}
-                className="mx-auto h-28 w-28 object-contain"
+                width={280}
+                height={280}
+                className="mx-auto h-40 w-40 object-contain"
               />
 
               <p className="mt-4 text-sm font-medium">
@@ -262,7 +264,7 @@ export default function RuangPage() {
               ) : null}
             </div>
           ) : (
-            <ul className="space-y-3">
+            <ul className="grid gap-4 md:grid-cols-2">
               {actions.map((action) => {
                 const log = logs[action._id];
                 const isBusy = busy === action._id;
