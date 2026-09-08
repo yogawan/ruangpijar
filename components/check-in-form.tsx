@@ -146,7 +146,7 @@ export function CheckInForm({
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Progress. The bar repeats what the counter already says, so it is
           decorative — the count is what gets announced. */}
-      <div>
+      <div data-tour="check-in-progress">
         <p aria-live="polite" className="mb-3 text-xs text-muted-foreground">
           Langkah {step + 1} dari {STEPS.length}
         </p>
@@ -164,7 +164,7 @@ export function CheckInForm({
       </div>
 
       {step === 0 ? (
-        <fieldset className="space-y-2">
+        <fieldset data-tour="check-in-mood" className="space-y-2">
           <legend className={QUESTION_CLASS}>
             Bagaimana perasaanmu hari ini?
           </legend>
@@ -382,7 +382,7 @@ export function CheckInForm({
         </div>
       ) : null}
 
-      <div className="flex gap-3 pt-1">
+      <div data-tour="check-in-actions" className="flex gap-3 pt-1">
         {step > 0 ? (
           <button
             type="button"

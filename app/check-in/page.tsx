@@ -9,6 +9,7 @@ import {
   type CheckInFormValues,
 } from "@/components/check-in-form";
 import NavbarGlobal from "@/components/NavbarGlobal";
+import OnboardingTour from "@/components/OnboardingTour";
 import StreakPopup from "@/components/StreakPopup";
 
 const ERROR_BY_STATUS: Record<number, string> = {
@@ -125,6 +126,8 @@ export default function CheckInPage() {
           goToJejak();
         }}
       />
+
+      <OnboardingTour />
     </>
   );
 }

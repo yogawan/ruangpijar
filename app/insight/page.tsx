@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import NavbarGlobal from "@/components/NavbarGlobal";
+import OnboardingTour from "@/components/OnboardingTour";
 import {
   type Insight,
   insightTypeLabel,
@@ -223,7 +224,10 @@ export default function InsightPage() {
             </p>
           </div>
 
-          <div className="mb-5 flex flex-wrap justify-center gap-2">
+          <div
+            data-tour="insight-filter"
+            className="mb-5 flex flex-wrap justify-center gap-2"
+          >
             <button
               type="button"
               onClick={() => setFilter("all")}
@@ -271,7 +275,13 @@ export default function InsightPage() {
               Memuat insight…
             </p>
           ) : items.length === 0 ? (
-            <div className="mx-auto max-w-md rounded-xl border border-border px-4 py-10 text-center">
+            // The empty state and the list below both answer to
+            // `insight-list`, so the walk-through has the same thing to point
+            // at either way.
+            <div
+              data-tour="insight-list"
+              className="mx-auto max-w-md rounded-xl border border-border px-4 py-10 text-center"
+            >
               {filter === "all" ? (
                 <Image
                   src="/maskot-pijar/Insight Unavailable.webp"
@@ -311,7 +321,10 @@ export default function InsightPage() {
                 {total} insight{filter === "unread" ? " belum dibaca" : ""}.
               </p>
 
-              <ul className="grid gap-4 md:grid-cols-2">
+              <ul
+                data-tour="insight-list"
+                className="grid gap-4 md:grid-cols-2"
+              >
                 {items.map((insight) => (
                   <li
                     key={insight._id}
@@ -389,6 +402,7 @@ export default function InsightPage() {
 
             <button
               type="button"
+              data-tour="insight-generate"
               onClick={generate}
               disabled={generating}
               className={`mt-4 ${OUTLINE_BUTTON_CLASS}`}
@@ -408,6 +422,8 @@ export default function InsightPage() {
           </div>
         </div>
       </main>
+
+      <OnboardingTour />
     </>
   );
 }

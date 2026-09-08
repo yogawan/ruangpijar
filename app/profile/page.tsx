@@ -10,12 +10,14 @@ import { type ChangeEvent, type FormEvent, useEffect, useState } from "react";
 import AvatarCropModal from "@/components/AvatarCropModal";
 import LoadingState from "@/components/LoadingState";
 import NavbarGlobal from "@/components/NavbarGlobal";
+import OnboardingTour from "@/components/OnboardingTour";
 import {
   CHECK_IN_FREQUENCIES,
   editablePersonalization,
   FOCUS_AREAS,
   type Personalization,
 } from "@/lib/personalization-labels";
+import { restartTours } from "@/lib/tour";
 
 // Shape returned by GET /api/me. passwordHash and googleId are select:false
 // server side, so they never reach the client.
@@ -284,7 +286,11 @@ export default function ProfilePage() {
           ) : null}
 
           {/* Akun — PATCH /api/me */}
-          <form onSubmit={handleAccountSubmit} className={SECTION_CLASS}>
+          <form
+            data-tour="profile-account"
+            onSubmit={handleAccountSubmit}
+            className={SECTION_CLASS}
+          >
             <h2 className="text-sm font-medium">Akun</h2>
 
             <div className="mt-4 space-y-5">
@@ -413,6 +419,7 @@ export default function ProfilePage() {
 
           {/* Preferensi — PATCH /api/personalization */}
           <form
+            data-tour="profile-preferences"
             onSubmit={handlePreferencesSubmit}
             className={`mt-4 ${SECTION_CLASS}`}
           >
@@ -511,6 +518,26 @@ export default function ProfilePage() {
             </div>
           </form>
 
+          {/* Panduan — the only way back into the walk-through once it has
+              been finished or skipped, which is what keeps it from showing
+              up uninvited everywhere else. */}
+          <section data-tour="profile-tour" className={`mt-4 ${SECTION_CLASS}`}>
+            <h2 className="text-sm font-medium">Panduan</h2>
+
+            <p className={`mt-2 ${HINT_CLASS}`}>
+              Panduan singkat akan muncul lagi di setiap bagian aplikasi saat
+              kamu membukanya.
+            </p>
+
+            <button
+              type="button"
+              onClick={restartTours}
+              className={`mt-4 ${OUTLINE_BUTTON_CLASS}`}
+            >
+              Ulangi panduan
+            </button>
+          </section>
+
           <button
             type="button"
             onClick={() => signOut({ redirectTo: "/auth/login" })}
@@ -536,6 +563,8 @@ export default function ProfilePage() {
         onCancel={closeCropModal}
         onCropped={handleCropped}
       />
+
+      <OnboardingTour />
     </>
   );
 }

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import NavbarGlobal from "@/components/NavbarGlobal";
+import OnboardingTour from "@/components/OnboardingTour";
 import {
   ACTION_TYPES,
   type Action,
@@ -186,7 +187,10 @@ export default function RuangPage() {
           </div>
 
           {/* Filter: no type means the personalised list */}
-          <div className="mb-5 flex flex-wrap justify-center gap-2">
+          <div
+            data-tour="ruang-filter"
+            className="mb-5 flex flex-wrap justify-center gap-2"
+          >
             <button
               type="button"
               onClick={() => setFilter(null)}
@@ -235,7 +239,12 @@ export default function RuangPage() {
               Memuat ruangmu…
             </p>
           ) : actions.length === 0 ? (
-            <div className="mx-auto max-w-md rounded-xl border border-border px-4 py-10 text-center">
+            // The empty state and the list below both answer to `ruang-list`,
+            // so the walk-through has the same thing to point at either way.
+            <div
+              data-tour="ruang-list"
+              className="mx-auto max-w-md rounded-xl border border-border px-4 py-10 text-center"
+            >
               <Image
                 src="/maskot-pijar/Empty State.webp"
                 alt=""
@@ -264,7 +273,7 @@ export default function RuangPage() {
               ) : null}
             </div>
           ) : (
-            <ul className="grid gap-4 md:grid-cols-2">
+            <ul data-tour="ruang-list" className="grid gap-4 md:grid-cols-2">
               {actions.map((action) => {
                 const log = logs[action._id];
                 const isBusy = busy === action._id;
@@ -339,6 +348,8 @@ export default function RuangPage() {
           </p>
         </div>
       </main>
+
+      <OnboardingTour />
     </>
   );
 }

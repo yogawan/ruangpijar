@@ -7,6 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 import CheckInCalendar from "@/components/CheckInCalendar";
 import CheckInDayModal from "@/components/CheckInDayModal";
 import NavbarGlobal from "@/components/NavbarGlobal";
+import OnboardingTour from "@/components/OnboardingTour";
 import { actionTypeLabel } from "@/lib/action-labels";
 import { dayKey, monthRange, startOfMonth } from "@/lib/calendar";
 import type { CheckIn } from "@/lib/check-in-labels";
@@ -315,7 +316,11 @@ export default function JejakPage() {
 
             {/* Latihan & insight — everything on this page that is not a
                 check-in, still in one chronological list. */}
-            <section aria-labelledby="jejak-lainnya" className="mt-10 lg:mt-0">
+            <section
+              data-tour="jejak-feed"
+              aria-labelledby="jejak-lainnya"
+              className="mt-10 lg:mt-0"
+            >
               <h2 id="jejak-lainnya" className="text-lg font-semibold">
                 Latihan &amp; Insight
               </h2>
@@ -439,6 +444,8 @@ export default function JejakPage() {
         checkIns={selectedCheckIns}
         onClose={() => setSelectedDay(null)}
       />
+
+      <OnboardingTour />
     </>
   );
 }

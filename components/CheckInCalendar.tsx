@@ -41,7 +41,7 @@ export default function CheckInCalendar({
   const atCurrentMonth = isSameMonth(month, today);
 
   return (
-    <section aria-label="Kalender check-in">
+    <section data-tour="jejak-kalender" aria-label="Kalender check-in">
       <header className="mb-4 flex items-center justify-between gap-3">
         <button
           type="button"

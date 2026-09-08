@@ -74,6 +74,10 @@ export default function NavbarGlobal({ variant }: NavbarGlobalProps) {
       className="sticky top-0 z-30 border-border/90 border-b bg-background/95"
     >
       <nav
+        // The walk-through spotlights the whole bar rather than the row of
+        // links inside it, which is display:none below `md` and so would be
+        // no target at all on a phone.
+        data-tour={variant === "app" ? "nav" : undefined}
         className="mx-auto flex h-20 max-w-6xl items-center justify-between px-5 sm:px-8"
         aria-label={
           variant === "marketing" ? "Navigasi utama" : "Navigasi aplikasi"
