@@ -240,6 +240,77 @@
         }
       }
     },
+    "/api/upload": {
+      "post": {
+        "tags": ["Me"],
+        "summary": "Upload a profile photo",
+        "description": "Uploads an image to Cloudinary and returns its URL; does not itself update the user document — pass the returned `url` as `avatarUrl` to `PATCH /api/me` to save it. One Cloudinary asset per user (re-uploading overwrites the previous one) rather than an unbounded media library.",
+        "operationId": "uploadImage",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["file"],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "image/jpeg, image/png, image/webp or image/gif, up to 5MB."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Upload succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "type": "string",
+                      "format": "uri",
+                      "example": "https://res.cloudinary.com/demo/image/upload/v1/ruangpijar/avatars/65f1a2b3c4d5e6f7a8b9c0d1.jpg"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing file, unsupported type, or over 5MB.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Unsupported file type"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No active session cookie.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Unauthorized"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/check-ins": {
       "get": {
         "tags": ["Check-ins"],
