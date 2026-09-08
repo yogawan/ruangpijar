@@ -1,10 +1,13 @@
 // @/app/profile/page.tsx
 "use client";
 
+import { CircleUser } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { type FormEvent, useEffect, useState } from "react";
+import { type ChangeEvent, type FormEvent, useEffect, useState } from "react";
+import AvatarCropModal from "@/components/AvatarCropModal";
 import LoadingState from "@/components/LoadingState";
 import NavbarGlobal from "@/components/NavbarGlobal";
 import {
@@ -62,6 +65,14 @@ const SECTION_CLASS = "rounded-xl border border-border px-4 py-5";
 export default function ProfilePage() {
   const router = useRouter();
   const [me, setMe] = useState<Me | null>(null);
+  // Controlled (unlike the rest of the account form, which reads straight
+  // off the DOM via FormData on submit) because handleAvatarChange has to
+  // update it programmatically once an upload finishes.
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [avatarError, setAvatarError] = useState<string | null>(null);
+  // Object URL of a just-picked file, while the crop step is open.
+  const [pendingCropSrc, setPendingCropSrc] = useState<string | null>(null);
   const [preferences, setPreferences] = useState<Personalization | null>(null);
   const [error, setError] = useState<string | null>(null);
   // Each section saves to its own endpoint, so pending and saved state are
@@ -97,6 +108,7 @@ export default function ProfilePage() {
         if (!active) return;
 
         setMe(meData);
+        setAvatarUrl(meData.avatarUrl);
         setPreferences(editablePersonalization(prefData));
       } catch {
         if (active) setError(NETWORK_ERROR);
@@ -150,16 +162,63 @@ export default function ProfilePage() {
     event.preventDefault();
 
     const formData = new FormData(event.currentTarget);
-    const avatarUrl = String(formData.get("avatarUrl") ?? "").trim();
 
     const updated = await save("account", "/api/me", {
       name: String(formData.get("name") ?? "").trim(),
-      // Nullable field — an emptied input means "no avatar", not "".
-      avatarUrl: avatarUrl || null,
+      avatarUrl,
     });
 
     // Keeps the header in step with the name that was just saved.
     if (updated) router.refresh();
+  }
+
+  function handleAvatarChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    // Otherwise picking the same file again after "Hapus foto" is a no-op:
+    // the input's value already equals it, so no change event fires.
+    event.target.value = "";
+    if (!file) return;
+
+    setAvatarError(null);
+    setPendingCropSrc(URL.createObjectURL(file));
+  }
+
+  // Shared by an explicit Batal and by a successful crop (which closes the
+  // modal before it starts uploading) — revokes the object URL either way
+  // rather than only on the cancel path.
+  function closeCropModal() {
+    if (pendingCropSrc) URL.revokeObjectURL(pendingCropSrc);
+    setPendingCropSrc(null);
+  }
+
+  async function handleCropped(blob: Blob) {
+    closeCropModal();
+    setAvatarUploading(true);
+
+    try {
+      const body = new FormData();
+      body.append("file", blob, "avatar.jpg");
+
+      const response = await fetch("/api/upload", { method: "POST", body });
+
+      if (response.status === 401) {
+        router.replace("/auth/login");
+        return;
+      }
+
+      if (!response.ok) {
+        setAvatarError("Foto belum bisa diunggah. Coba lagi sebentar lagi.");
+        return;
+      }
+
+      const data = (await response.json()) as { url: string };
+      setAvatarUrl(data.url);
+      setSaved(null);
+    } catch {
+      setAvatarError("Tidak bisa terhubung ke server. Periksa koneksimu.");
+    } finally {
+      setAvatarUploading(false);
+    }
   }
 
   async function handlePreferencesSubmit(event: FormEvent<HTMLFormElement>) {
@@ -269,22 +328,71 @@ export default function ProfilePage() {
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="avatarUrl" className="text-sm font-medium">
-                  Foto profil
-                </label>
+                <span className="text-sm font-medium">Foto profil</span>
 
-                <input
-                  id="avatarUrl"
-                  name="avatarUrl"
-                  type="url"
-                  inputMode="url"
-                  placeholder="https://…"
-                  defaultValue={me.avatarUrl ?? ""}
-                  onChange={() => setSaved(null)}
-                  className={FIELD_CLASS}
-                />
+                <div className="flex items-center gap-4">
+                  {avatarUrl ? (
+                    <Image
+                      src={avatarUrl}
+                      alt=""
+                      width={64}
+                      height={64}
+                      className="h-16 w-16 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div
+                      aria-hidden="true"
+                      className="flex h-16 w-16 items-center justify-center rounded-full bg-surface-muted"
+                    >
+                      <CircleUser className="h-8 w-8 text-muted-foreground" />
+                    </div>
+                  )}
 
-                <p className={HINT_CLASS}>Tautan gambar. Boleh dikosongkan.</p>
+                  <div className="space-y-1.5">
+                    <label
+                      className={`inline-flex cursor-pointer items-center rounded-xl border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-muted ${
+                        avatarUploading ? "cursor-not-allowed opacity-60" : ""
+                      }`}
+                    >
+                      {avatarUploading ? "Mengunggah…" : "Ganti foto"}
+
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp,image/gif"
+                        disabled={avatarUploading}
+                        onChange={handleAvatarChange}
+                        className="sr-only"
+                      />
+                    </label>
+
+                    {avatarUrl ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAvatarUrl(null);
+                          setSaved(null);
+                        }}
+                        disabled={avatarUploading}
+                        className="block text-xs text-muted-foreground hover:underline disabled:cursor-not-allowed"
+                      >
+                        Hapus foto
+                      </button>
+                    ) : null}
+                  </div>
+                </div>
+
+                {avatarError ? (
+                  <p
+                    role="alert"
+                    className="text-xs text-red-700 dark:text-red-300"
+                  >
+                    {avatarError}
+                  </p>
+                ) : null}
+
+                <p className={HINT_CLASS}>
+                  JPG, PNG, WEBP, atau GIF. Maksimal 5MB.
+                </p>
               </div>
 
               <button
@@ -422,6 +530,12 @@ export default function ProfilePage() {
           </p>
         </div>
       </main>
+
+      <AvatarCropModal
+        imageSrc={pendingCropSrc}
+        onCancel={closeCropModal}
+        onCropped={handleCropped}
+      />
     </>
   );
 }
