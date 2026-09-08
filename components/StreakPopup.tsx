@@ -105,9 +105,9 @@ export default function StreakPopup({ streak, onClose }: StreakPopupProps) {
             <Image
               src="/maskot-pijar/Streak.webp"
               alt=""
-              width={200}
-              height={200}
-              className="h-40 w-40 object-contain"
+              width={240}
+              height={240}
+              className="h-56 w-56 object-contain"
             />
           </div>
 

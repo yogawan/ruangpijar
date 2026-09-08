@@ -12,9 +12,9 @@ export default function LoadingState({ label }: { label: string }) {
       <Image
         src="/maskot-pijar/Loading.webp"
         alt=""
-        width={200}
-        height={200}
-        className="h-28 w-28 animate-pulse object-contain"
+        width={280}
+        height={280}
+        className="h-40 w-40 animate-pulse object-contain"
       />
 
       <p className="text-sm text-muted-foreground">{label}</p>
