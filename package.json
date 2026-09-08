@@ -22,7 +22,8 @@
     "nodemailer": "^10.0.1",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "react-easy-crop": "^6.2.3"
+    "react-easy-crop": "^6.2.3",
+    "react-joyride": "^3.2.0"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.2",
