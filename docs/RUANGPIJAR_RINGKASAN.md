@@ -1,9 +1,71 @@
-# RuangPijar — Gambaran Produk untuk Stakeholder
+# Masalah/Latar Belakang/Tema Lomba
 
-Dokumen ini menjelaskan apa yang bisa dilakukan pengguna di RuangPijar dan
-bagaimana pengalamannya, ditulis tanpa istilah teknis. Cocok dibagikan ke
-siapa saja yang perlu memahami produk secara garis besar — tanpa perlu latar
-belakang IT.
+Kesehatan mental (mental well-being) merupakan salah satu aspek penting
+dalam kehidupan generasi muda, termasuk mahasiswa. Kehidupan perkuliahan
+dapat dihadapkan pada berbagai tuntutan akademik, sosial, maupun pribadi
+yang berpotensi memengaruhi kondisi psikologis mahasiswa. Di sisi lain,
+mahasiswa juga dapat menghadapi hambatan dalam memperoleh dukungan
+kesehatan mental melalui layanan konvensional. Kondisi tersebut
+menunjukan pentingnya pengembangan media pendukung yang mudah diakses,
+informatif, dan sesuai dengan kebutuhan pengguna.
+
+Perkembangan teknologi digital memberikan peluang dalam menghadirkan
+alternatif dukungan kesehatan mental melalui berbagai platform digital,
+termasuk website dan aplikasi. Lattie el al. (2019) melalui tinjauan
+sistematis terhadap 89 penelitian mengenai intervensi kesehatan mental
+digital pada mahasiswa menemukan bahwa 80% intervensi yang teliti
+disampaikan melalui website. Hasil kajian tersebut juga menunjukan bahwa
+sebagian besar program yang teliti memberikan hasil efektif atau
+sebagian efektif dalam meningkatkan kondisi psikologis, termasuk
+depresi, kecemasan, dan psychological well-being. Penelitian tersebut
+juga menekankan pentingnya aspek usability, penerimaan pengguna, dan
+pengalaman pengguna dalam pengembangan intervensi kesehatan mental
+digital.
+
+Pemanfaatan teknologi digital juga memiliki potensi untuk membantu
+memperluas akses terhadap dukungan kesehatan mental. Naslund et
+al. (2017) menjelaskan bahwa teknologi digital dapat dimanfaatkan dalam
+upaya pencegahan dan penanganan gangguan mental, terutama dalam kondisi
+ketika akses terhadap layanan kesehatan mental masil terbatas. Hal ini
+menunjukan bahwa teknologi dapat menjadi salah satu sarana pendukung
+untuk menjembatani kebutuhan masyarakat terhadap informasi dan layanan
+kesehatan mental.
+
+Dalam konteks tersebut, bidang informatika memiliki peran penting dalam
+merancang solusi digital yang tidak hanya berfungsi secara teknis,
+tetapi juga memperhatikan kebutuhan dan pengalaman pengguna.
+Pengembangan website dengan antarmuka yang mudah digunakan, informasi
+yang terstruktur, aksesibilitas yang baik, serta memperlihatkan keamanan
+dan privasi dapat menjadi bagian penting dalam menghadirkan solusi
+digital yang bertanggung jawab untuk mendukung mental well-being.
+
+Berdasarkan kebutuhan tersebut, Himpunan Mahasiswa Informatika (HMIF)
+Universitas Jenderal Ahcmad Yani Yogyakarta menginisiasi MindCraft Web
+Competition 2026 dengan tema "Building Digital Solutions, for Mental
+Well-being". Kompetisi tingkat Regional Pulau Jawa ini di rancang
+sebagai wdah bagi mahasiswa untuk mengembangkan kreativitas, kemampuan
+web development, serta perancangan antarmuka dan pengalaman pengguna
+(UI/UX) dalam menghasilkan solusi digital yang inovatif dan berorientasi
+pada kebutuhan pengguna.
+
+Melalui kegiatan ini, peserta diharapkan mampu menghasilkan website yang
+tidak hanya menarik secara visual dan fungsional, tetapi juga memiliki
+nilai manfaat, mudah digunakan, inklusif, serta memperhatikan aspek
+keamanan, privasi, dan etika. Dengan demikian, MindCraft Web Competition
+2026 diharapkan dapat menjadi ruang bagi mahasiswa untuk mengembangkan
+kompetensi di bidang Informatika sekaligus mendorong terciptanya inovasi
+digital yang dapat memberikan kontribusi positif terhadap mental
+well-being masyarakat.
+
+# Solusi: RuangPijar — Gambaran Produk untuk Stakeholder
+
+Berangkat dari latar belakang tersebut, RuangPijar dikembangkan sebagai salah
+satu jawaban atas kebutuhan akan media pendukung kesehatan mental yang mudah
+diakses, informatif, dan sesuai dengan kebutuhan mahasiswa. Dokumen ini
+menjelaskan apa yang bisa dilakukan pengguna di RuangPijar dan bagaimana
+pengalamannya, ditulis tanpa istilah teknis. Cocok dibagikan ke siapa saja
+yang perlu memahami produk secara garis besar — tanpa perlu latar belakang
+IT.
 
 > Untuk tim development yang butuh detail teknis (nama data, cara sistem
 > bekerja di baliknya, dan catatan implementasi), lihat `USER_JOURNEY.md`.
