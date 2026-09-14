@@ -26,7 +26,7 @@ export async function connectDB(): Promise<typeof mongoose> {
   }
 
   if (!cache.promise) {
-    cache.promise = mongoose.connect(uri);
+    cache.promise = mongoose.connect(uri, { dbName: "ruangpijar" });
   }
 
   try {
