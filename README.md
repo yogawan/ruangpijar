@@ -1,4 +1,6 @@
 <div align="center">
+  <img src="public/thumb-1.png" alt="RuangPijar landing page hero section" width="100%" />
+  
   <img src="public/ruang_pijar_logo.webp" alt="RuangPijar" width="72" height="72" />
 
   <h1>RuangPijar</h1>
